@@ -1,24 +1,15 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import 'react-native-reanimated';
-
-import { useColorScheme } from '@/hooks/use-color-scheme';
-
-export const unstable_settings = {
-  anchor: '(tabs)',
-};
+import { SQLiteProvider } from 'expo-sqlite';
+import { initializeDatabase } from '../src/database/initializeDatabase';
 
 export default function RootLayout() {
-  const colorScheme = useColorScheme();
-
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <SQLiteProvider databaseName="easymovie.db" onInit={initializeDatabase}>
       <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+        <Stack.Screen name="index" options={{ headerShown: false }} /> {/* Tela de Login */}
+        <Stack.Screen name="register" options={{ title: 'Cadastro' }} />
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} /> {/* Área Logada */}
       </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
+    </SQLiteProvider>
   );
 }
