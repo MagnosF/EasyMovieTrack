@@ -20,8 +20,8 @@ export default function Login() {
 
       if (user) {
         Alert.alert("Bem-vindo!", `Olá, ${user.name}`);
-        // Se for admin (HU4), você pode redirecionar para uma área especial depois
-        router.replace('/(tabs)'); 
+        // Redireciona para a área logada (movies tab)
+        router.replace('/(tabs)/movies'); 
       } else {
         Alert.alert("Erro", "E-mail ou senha incorretos.");
       }
