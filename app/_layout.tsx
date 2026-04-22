@@ -9,6 +9,7 @@ export default function RootLayout() {
         <Stack.Screen name="index" options={{ headerShown: false }} />
         <Stack.Screen name="register" options={{ title: 'Cadastro' }} />
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+        <Stack.Screen name="forgot-password" options={{ title: 'Recuperar Senha' }} />
       </Stack>
     </SQLiteProvider>
   );

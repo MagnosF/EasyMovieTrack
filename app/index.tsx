@@ -11,21 +11,28 @@ export default function Login() {
   const router = useRouter();
 
   async function handleLogin() {
+    if (!email || !password) {
+      Alert.alert("Erro", "Preencha todos os campos.");
+      return;
+    }
+
     try {
-      // Busca o usuário no banco (HU3)
+      // 1. Busca simples (sem toLowerCase por enquanto para não dar erro com cadastros antigos)
       const user: any = await db.getFirstAsync(
         'SELECT * FROM users WHERE email = ? AND password = ?',
         [email, password]
       );
 
+      console.log("Usuário encontrado:", user); // Verifique o que está retornando aqui
       if (user) {
-        Alert.alert("Bem-vindo!", `Olá, ${user.name}`);
-        // Redireciona para a área logada (movies tab)
-        router.replace('/(tabs)/movies'); 
+        // 2. Navegação com a rota exata
+        // Passa o email como parâmetro para a tela de perfil
+        router.replace(`/(tabs)/profile?userEmail=${user.email}` as any); 
       } else {
         Alert.alert("Erro", "E-mail ou senha incorretos.");
       }
     } catch (error) {
+      console.error(error);
       Alert.alert("Erro", "Erro ao acessar o banco de dados.");
     }
   }
@@ -34,13 +41,29 @@ export default function Login() {
     <View style={styles.container}>
       <Text style={styles.title}>EasyMovieTrack</Text>
       
-      <TextInput style={styles.input} placeholder="E-mail" onChangeText={setEmail} autoCapitalize="none" />
-      <TextInput style={styles.input} placeholder="Senha" onChangeText={setPassword} secureTextEntry />
+      <TextInput 
+        style={styles.input} 
+        placeholder="E-mail" 
+        placeholderTextColor="#aaa" 
+        onChangeText={setEmail} 
+        autoCapitalize="none" 
+      />
+      <TextInput 
+        style={styles.input} 
+        placeholder="Senha" 
+        placeholderTextColor="#aaa" 
+        onChangeText={setPassword} 
+        secureTextEntry 
+      />
 
       <TouchableOpacity style={styles.button} onPress={handleLogin}>
         <Text style={styles.buttonText}>Entrar</Text>
       </TouchableOpacity>
       
+      <TouchableOpacity onPress={() => router.push('/forgot-password' as any)}>
+        <Text style={styles.linkText}>Esqueceu a senha?</Text>
+      </TouchableOpacity>
+
       <TouchableOpacity onPress={() => router.push('/register')}>
         <Text style={styles.linkText}>Não tem conta? Cadastre-se</Text>
       </TouchableOpacity>
