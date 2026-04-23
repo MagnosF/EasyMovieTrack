@@ -1,19 +1,10 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Theme } from '../../constants/theme';
 import { globalStyles } from '../../src/styles/globalStyles';
-
-// Interface para os dados do usuário
-interface UserData {
-  name: string;
-  email: string;
-  role: string;
-  avatar_color?: string;
-  avatar_icon?: string;
-}
 
 // Opções de cores e ícones para personalização do avatar
 const COLORS = ['#00E5FF', '#7B61FF', '#FFFFFF', '#4CC9FE', '#3F72AF', '#2D333B'];
@@ -25,22 +16,25 @@ export default function Profile() {
   const router = useRouter();
   const db = useSQLiteContext();
   const params = useLocalSearchParams();
+
   // Estado para armazenar os dados do usuário e controlar o modo de edição
-  const [user, setUser] = useState<UserData | null>(null);
+  const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState('');
   const [newPassword, setNewPassword] = useState('');
+
   // Estado para personalização do avatar
   const [selectedColor, setSelectedColor] = useState(Theme.colors.primary);
   const [selectedIcon, setSelectedIcon] = useState('weather-lightning');
+
   // Função para carregar os dados do usuário a partir do banco de dados usando o e-mail passado como parâmetro
   async function loadUserData() {
     try {
       // Verifica se o e-mail do usuário foi passado como parâmetro e busca os dados correspondentes no banco de dados
       if (params.userEmail) {
-        const result = await db.getFirstAsync<UserData>(
+        const result = await db.getFirstAsync(
           'SELECT name, email, role, avatar_color, avatar_icon FROM users WHERE email = ?',
-          [params.userEmail as string]
+          [params.userEmail]
         );
         // Se os dados forem encontrados, atualiza o estado do usuário e as opções de personalização do avatar
         if (result) {
@@ -55,6 +49,7 @@ export default function Profile() {
 
   // Carrega os dados do usuário quando o componente é montado ou quando o e-mail do usuário nos parâmetros de rota muda
   useEffect(() => { loadUserData(); }, [params.userEmail]);
+
   // Função para lidar com o logout do usuário, exibindo uma confirmação antes de redirecionar para a tela de login
   function handleLogout() {
     Alert.alert("Sair", "Deseja encerrar sessão?", [
@@ -62,6 +57,7 @@ export default function Profile() {
       { text: "Sair", onPress: () => router.replace('/') }
     ]);
   }
+
   // Função para lidar com a atualização do perfil do usuário, incluindo validação de senha e atualização dos dados no banco de dados
   async function handleUpdateProfile() {
     // Validação simples para garantir que o nome não esteja vazio e que a nova senha, se fornecida, tenha pelo menos 6 caracteres  
@@ -76,6 +72,7 @@ export default function Profile() {
       // Finaliza a query SQL adicionando a condição para atualizar apenas o usuário atual
       query += ` WHERE email = '${user?.email}'`;
       await db.execAsync(query);
+
       // Atualiza o estado do usuário com as novas informações para refletir as mudanças na interface
       if (user) setUser({ ...user, name: newName, avatar_color: selectedColor, avatar_icon: selectedIcon });
       setIsEditing(false);
@@ -88,7 +85,7 @@ export default function Profile() {
       <View style={styles.header}>
         {/* Avatar com Brilho Exterior (Glow) */}
         <View style={[styles.avatarCircle, { backgroundColor: selectedColor, shadowColor: selectedColor }]}>
-           <MaterialCommunityIcons name={selectedIcon as any} size={60} color={selectedColor === '#FFFFFF' ? '#000' : 'white'} />
+           <MaterialCommunityIcons name={selectedIcon} size={60} color={selectedColor === '#FFFFFF' ? '#000' : 'white'} />
         </View>
 
         {isEditing ? (
@@ -112,7 +109,7 @@ export default function Profile() {
                   style={[styles.iconBox, { backgroundColor: selectedIcon === icon ? Theme.colors.primary : Theme.colors.surface }]} 
                   onPress={() => setSelectedIcon(icon)}
                 >
-                  <MaterialCommunityIcons name={icon as any} size={24} color={selectedIcon === icon ? 'black' : 'white'} />
+                  <MaterialCommunityIcons name={icon} size={24} color={selectedIcon === icon ? 'black' : 'white'} />
                 </TouchableOpacity>
               ))}
             </View>
@@ -127,11 +124,29 @@ export default function Profile() {
         ) : (
           <>
             <Text style={[globalStyles.title, { marginBottom: 5 }]}>{user?.name}</Text>
-            <Text style={{ color: Theme.colors.textSecondary, marginBottom: 20 }}>{user?.email}</Text>
+            <Text style={{ color: Theme.colors.textSecondary, marginBottom: 5 }}>{user?.email}</Text>
+            {/* Exibe o cargo do usuário para facilitar identificação do Admin */}
+            <Text style={{ color: Theme.colors.primary, fontSize: 10, fontWeight: 'bold', marginBottom: 20 }}>
+              {user?.role?.toUpperCase()}
+            </Text>
             
             <TouchableOpacity style={globalStyles.buttonPrimary} onPress={() => setIsEditing(true)}>
               <Text style={globalStyles.buttonText}>CUSTOMIZAR PERFIL</Text>
             </TouchableOpacity>
+
+            {/* HU4: Botão de gestão exclusivo para usuários com cargo de admin */}
+            {/* Ajustado para enviar o userRole via params, garantindo acesso à tela protegida */}
+            {user?.role === 'admin' && (
+              <TouchableOpacity 
+                style={[styles.logoutBtn, { borderColor: Theme.colors.primary, marginTop: 10 }]} 
+                onPress={() => router.push({
+                  pathname: '/admin-users',
+                  params: { userRole: user.role }
+                })}
+              >
+                <Text style={{ color: Theme.colors.primary, fontWeight: 'bold' }}>GERENCIAR USUÁRIOS</Text>
+              </TouchableOpacity>
+            )}
 
             <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
               <Text style={{ color: Theme.colors.danger, fontWeight: 'bold' }}>SAIR DA CONTA</Text>

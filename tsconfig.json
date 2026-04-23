@@ -13,5 +13,5 @@
     "**/*.tsx",
     ".expo/types/**/*.ts",
     "expo-env.d.ts"
-  ]
+, "app/index.js", "src/database/initializeDatabase.js", "app/(tabs)/profile.js", "app/admin-users.js", "app/(tabs)/_layout.js", "app/register.js", "app/forgot-password.js", "app/(tabs)/movies.js", "app/_layout.js", "app/modal.js", "constants/theme.js", "hooks/use-theme-color.js", "hooks/use-color-scheme.js", "hooks/use-color-scheme.web.js"  ]
 }

@@ -7,13 +7,12 @@ export default function TabLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
-        // Um toque de estilo
         tabBarActiveTintColor: Theme.colors.primary, 
         tabBarInactiveTintColor: Theme.colors.textSecondary,
         tabBarStyle: {
-          backgroundColor: Theme.colors.background, // Fundo preto profundo
-          borderTopColor: '#1E252E',               // Linha sutil azulada
-          height: 60,                              
+          backgroundColor: Theme.colors.background,
+          borderTopColor: '#1E252E',
+          height: 60,
           paddingBottom: 8,
         },
         tabBarLabelStyle: {
@@ -25,7 +24,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="movies"
         options={{
-          title: 'CineStorm', // Título estilizado para o app
+          title: 'CineStorm',
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="weather-lightning" size={size} color={color} />
           ),
