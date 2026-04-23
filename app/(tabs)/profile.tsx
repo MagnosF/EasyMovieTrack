@@ -6,6 +6,7 @@ import { Alert, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View 
 import { Theme } from '../../constants/theme';
 import { globalStyles } from '../../src/styles/globalStyles';
 
+// Interface para os dados do usuário
 interface UserData {
   name: string;
   email: string;
@@ -14,29 +15,34 @@ interface UserData {
   avatar_icon?: string;
 }
 
+// Opções de cores e ícones para personalização do avatar
 const COLORS = ['#00E5FF', '#7B61FF', '#FFFFFF', '#4CC9FE', '#3F72AF', '#2D333B'];
 const ICONS = ['weather-lightning', 'flash', 'weather-pouring', 'movie-roll', 'popcorn', 'star'];
 
+// Tela de perfil do usuário, onde ele pode ver e editar suas informações, além de personalizar seu avatar
 export default function Profile() {
+  // Hooks para navegação, acesso ao banco de dados e parâmetros de rota
   const router = useRouter();
   const db = useSQLiteContext();
   const params = useLocalSearchParams();
-  
+  // Estado para armazenar os dados do usuário e controlar o modo de edição
   const [user, setUser] = useState<UserData | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  
+  // Estado para personalização do avatar
   const [selectedColor, setSelectedColor] = useState(Theme.colors.primary);
   const [selectedIcon, setSelectedIcon] = useState('weather-lightning');
-
+  // Função para carregar os dados do usuário a partir do banco de dados usando o e-mail passado como parâmetro
   async function loadUserData() {
     try {
+      // Verifica se o e-mail do usuário foi passado como parâmetro e busca os dados correspondentes no banco de dados
       if (params.userEmail) {
         const result = await db.getFirstAsync<UserData>(
           'SELECT name, email, role, avatar_color, avatar_icon FROM users WHERE email = ?',
           [params.userEmail as string]
         );
+        // Se os dados forem encontrados, atualiza o estado do usuário e as opções de personalização do avatar
         if (result) {
           setUser(result);
           setNewName(result.name);
@@ -47,24 +53,30 @@ export default function Profile() {
     } catch (error) { console.error(error); }
   }
 
+  // Carrega os dados do usuário quando o componente é montado ou quando o e-mail do usuário nos parâmetros de rota muda
   useEffect(() => { loadUserData(); }, [params.userEmail]);
-
+  // Função para lidar com o logout do usuário, exibindo uma confirmação antes de redirecionar para a tela de login
   function handleLogout() {
     Alert.alert("Sair", "Deseja encerrar sessão?", [
       { text: "Cancelar", style: "cancel" },
       { text: "Sair", onPress: () => router.replace('/') }
     ]);
   }
-
+  // Função para lidar com a atualização do perfil do usuário, incluindo validação de senha e atualização dos dados no banco de dados
   async function handleUpdateProfile() {
+    // Validação simples para garantir que o nome não esteja vazio e que a nova senha, se fornecida, tenha pelo menos 6 caracteres  
     try {
       let query = `UPDATE users SET name = '${newName}', avatar_color = '${selectedColor}', avatar_icon = '${selectedIcon}'`;
+      // Se o usuário forneceu uma nova senha, adiciona essa atualização à query SQL
       if (newPassword.trim().length > 0) {
+        // Validação de senha: mínimo 6 caracteres
         if (newPassword.length < 6) return Alert.alert("Erro", "Senha muito fraca! Mínimo 6 caracteres.");
         query += `, password = '${newPassword}'`;
       }
+      // Finaliza a query SQL adicionando a condição para atualizar apenas o usuário atual
       query += ` WHERE email = '${user?.email}'`;
       await db.execAsync(query);
+      // Atualiza o estado do usuário com as novas informações para refletir as mudanças na interface
       if (user) setUser({ ...user, name: newName, avatar_color: selectedColor, avatar_icon: selectedIcon });
       setIsEditing(false);
       Alert.alert("Sucesso", "Perfil atualizado com sucesso!");

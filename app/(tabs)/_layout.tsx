@@ -1,19 +1,19 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
-import { Theme } from '../../constants/theme'; // Importando seu novo tema
+import { Theme } from '../../constants/theme';
 
 export default function TabLayout() {
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        // Usando o Azul Elétrico do tema para o ícone ativo
+        // Um toque de estilo
         tabBarActiveTintColor: Theme.colors.primary, 
         tabBarInactiveTintColor: Theme.colors.textSecondary,
         tabBarStyle: {
           backgroundColor: Theme.colors.background, // Fundo preto profundo
           borderTopColor: '#1E252E',               // Linha sutil azulada
-          height: 60,                              // Um pouco mais alta para ficar elegante
+          height: 60,                              
           paddingBottom: 8,
         },
         tabBarLabelStyle: {
@@ -25,7 +25,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="movies"
         options={{
-          title: 'CineStorm', // Nome personalizado para combinar com o tema
+          title: 'CineStorm', // Título estilizado para o app
           tabBarIcon: ({ color, size }) => (
             <MaterialCommunityIcons name="weather-lightning" size={size} color={color} />
           ),

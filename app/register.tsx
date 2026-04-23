@@ -5,20 +5,28 @@ import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Theme } from '../constants/theme';
 import { globalStyles } from '../src/styles/globalStyles';
 
+// Tela de registro, onde o usuário pode criar uma nova conta inserindo seu nome, e-mail e senha
 export default function Register() {
+  // Estados para armazenar o nome, e-mail e senha inseridos pelo usuário
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  
+  // Acesso ao banco de dados e navegação
   const db = useSQLiteContext();
   const router = useRouter();
 
+  // Função para lidar com o registro do usuário, incluindo validação dos campos e inserção no banco de dados
   async function handleRegister() {
     if (!name || !email || !password) {
       Alert.alert("Erro", "Preencha todos os campos!");
       return;
     }
-
+    // Validação de senha: mínimo 6 caracteres
+    if (password.length < 6) {
+      Alert.alert("Erro", "A senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
+    // Insere o novo usuário no banco de dados usando uma query SQL parametrizada para evitar injeção de SQL
     try {
       await db.runAsync(
         'INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)',

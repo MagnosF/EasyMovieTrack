@@ -20,7 +20,7 @@ export default function Movies() {
 
       <Text style={styles.subtitle}>Sua trilha de filmes.</Text>
 
-      {/* CARD DE EXEMPLO (HU4 - Futuro) */}
+      {/* CARD (HU4 - Futuro) */}
       <View style={styles.movieCard}>
         <View style={styles.posterPlaceholder}>
           <MaterialCommunityIcons name="movie-open-play" size={50} color={Theme.colors.textSecondary} />
@@ -31,7 +31,7 @@ export default function Movies() {
         </View>
       </View>
 
-      {/* BOTÃO DE AÇÃO (SÓ EXEMPLO) */}
+      {/* BOTÃO DE AÇÃO (HU4 - Futuro) */}
       <TouchableOpacity style={[globalStyles.buttonPrimary, { width: '100%' }]}>
         <Text style={globalStyles.buttonText}>Explorar Catálogo</Text>
       </TouchableOpacity>

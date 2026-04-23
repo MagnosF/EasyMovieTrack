@@ -16,8 +16,8 @@ export async function initializeDatabase(database: SQLiteDatabase) {
       );
     `);
 
-    // 2. MIGRATION: Tenta adicionar as colunas novas caso a tabela já exista de versões anteriores
-    // Usamos blocos try/catch individuais porque se a coluna já existir, o SQLite dá erro.
+    // 2. MIGRATION: Adiciona colunas de avatar_color e avatar_icon para usuários existentes
+    // Usei blocos try/catch individuais porque se a coluna já existir, o SQLite dá erro.
     try {
       await database.execAsync("ALTER TABLE users ADD COLUMN avatar_color TEXT DEFAULT '#E50914';");
     } catch (e) {

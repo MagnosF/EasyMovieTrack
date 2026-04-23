@@ -5,19 +5,23 @@ import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Theme } from '..//constants/theme';
 import { globalStyles } from '../src/styles/globalStyles';
 
+// Tela de login, onde o usuário pode inserir seu e-mail e senha para acessar sua conta ou navegar para as telas de recuperação de senha e registro
 export default function Login() {
+  // Estados para armazenar o e-mail e a senha inseridos pelo usuário
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const db = useSQLiteContext();
   const router = useRouter();
-
+  // Função para lidar com o login do usuário, incluindo validação dos campos e consulta ao banco de dados para verificar as credenciais
   async function handleLogin() {
     if (!email || !password) return Alert.alert("Erro", "Preencha todos os campos.");
+    // Consulta ao banco de dados para verificar se existe um usuário com o e-mail e senha fornecidos, usando uma query SQL parametrizada para evitar injeção de SQL
     try {
       const user: any = await db.getFirstAsync(
         'SELECT * FROM users WHERE email = ? AND password = ?',
         [email, password]
       );
+      // Se um usuário for encontrado, redireciona para a tela de perfil passando o e-mail do usuário como parâmetro; caso contrário, exibe um alerta de erro
       if (user) {
         router.replace(`/(tabs)/profile?userEmail=${user.email}` as any); 
       } else {
