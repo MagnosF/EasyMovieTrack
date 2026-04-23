@@ -1,7 +1,9 @@
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import React, { useState } from 'react';
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Theme } from '../constants/theme';
+import { globalStyles } from '../src/styles/globalStyles';
 
 export default function ForgotPassword() {
   const [email, setEmail] = useState('');
@@ -16,7 +18,6 @@ export default function ForgotPassword() {
     }
 
     try {
-      // 1. Verifica se o e-mail existe no banco
       const user: any = await db.getFirstAsync('SELECT id FROM users WHERE email = ?', [email]);
 
       if (!user) {
@@ -24,54 +25,45 @@ export default function ForgotPassword() {
         return;
       }
 
-      // 2. Atualiza a senha do usuário
       await db.runAsync('UPDATE users SET password = ? WHERE email = ?', [newPassword, email]);
 
       Alert.alert("Sucesso", "Senha redefinida com sucesso!");
-      router.replace('/'); // Volta para o Login
+      router.replace('/'); 
     } catch (error) {
       Alert.alert("Erro", "Ocorreu um erro ao redefinir a senha.");
     }
   }
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Recuperar Senha</Text>
-      <Text style={styles.subtitle}>Digite seu e-mail e a nova senha desejada.</Text>
+    <View style={globalStyles.safeArea}>
+      <Text style={globalStyles.title}>RECUPERAR</Text>
+      <Text style={[globalStyles.linkText, { marginBottom: 20 }]}>
+        Digite seu e-mail e a nova senha desejada.
+      </Text>
 
       <TextInput 
-        style={styles.input} 
-        placeholder="Seu e-mail cadastrado" 
-        placeholderTextColor="#aaa"
+        style={globalStyles.input} 
+        placeholder="E-mail cadastrado" 
+        placeholderTextColor={Theme.colors.textSecondary}
         onChangeText={setEmail}
         autoCapitalize="none"
       />
 
       <TextInput 
-        style={styles.input} 
+        style={globalStyles.input} 
         placeholder="Nova Senha" 
-        placeholderTextColor="#aaa"
+        placeholderTextColor={Theme.colors.textSecondary}
         secureTextEntry 
         onChangeText={setNewPassword}
       />
 
-      <TouchableOpacity style={styles.button} onPress={handleResetPassword}>
-        <Text style={styles.buttonText}>Atualizar Senha</Text>
+      <TouchableOpacity style={globalStyles.buttonPrimary} onPress={handleResetPassword}>
+        <Text style={globalStyles.buttonText}>Atualizar Senha</Text>
       </TouchableOpacity>
 
       <TouchableOpacity onPress={() => router.back()}>
-        <Text style={styles.linkText}>Voltar ao Login</Text>
+        <Text style={globalStyles.linkText}>Voltar ao Login</Text>
       </TouchableOpacity>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: 'center', padding: 20, backgroundColor: '#121212' },
-  title: { fontSize: 24, color: '#fff', fontWeight: 'bold', marginBottom: 10, textAlign: 'center' },
-  subtitle: { color: '#aaa', textAlign: 'center', marginBottom: 30 },
-  input: { backgroundColor: '#333', color: '#fff', padding: 15, borderRadius: 8, marginBottom: 15 },
-  button: { backgroundColor: '#E50914', padding: 15, borderRadius: 8, alignItems: 'center' },
-  buttonText: { color: '#fff', fontWeight: 'bold' },
-  linkText: { color: '#aaa', textAlign: 'center', marginTop: 20 }
-});
