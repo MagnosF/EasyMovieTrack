@@ -2,7 +2,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
-import { Alert, FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Theme } from '../constants/theme';
 import { globalStyles } from '../src/styles/globalStyles';
 
@@ -22,7 +22,9 @@ export default function AdminUsers() {
     } else {
       loadUsers();
     }
-  }, [params.userRole]);
+  }, 
+  // O efeito depende do userRole para garantir que a verificação ocorra sempre que o parâmetro mudar (ex: após login)
+  [params.userRole]);
 
   // Função para carregar a lista de usuários do banco de dados
   async function loadUsers() {
@@ -38,7 +40,7 @@ export default function AdminUsers() {
   // Função para banir (deletar) um usuário do banco de dados
   async function handleDeleteUser(id, name) {
     Alert.alert(
-      "Banir Usuário", 
+      "Remover Usuário", 
       `Tem certeza que deseja remover ${name} da plataforma?`, 
       [
         { text: "Cancelar", style: "cancel" },
@@ -68,7 +70,7 @@ export default function AdminUsers() {
         <Text style={[globalStyles.title, { marginBottom: 0 }]}>PAINEL ADMIN</Text>
       </View>
 
-      <Text style={styles.subtitle}>Gerenciamento de tripulação e acessos.</Text>
+      <Text style={styles.subtitle}>Gerenciamento de usuários.</Text>
       
       <FlatList
         data={users}
@@ -76,8 +78,13 @@ export default function AdminUsers() {
         renderItem={({ item }) => (
           <View style={styles.userCard}>
             <View style={styles.userInfo}>
-              <View style={[styles.avatarMini, { backgroundColor: item.avatar_color || Theme.colors.primary }]}>
-                <MaterialCommunityIcons name={item.avatar_icon || 'account'} size={20} color="white" />
+              {/* Avatar: Lógica para mostrar foto da galeria ou o avatar padrão com ícone */}
+              <View style={[styles.avatarMini, { backgroundColor: item.avatar_color || Theme.colors.primary, overflow: 'hidden' }]}>
+                {item.image ? (
+                  <Image source={{ uri: item.image }} style={styles.avatarImageFull} />
+                ) : (
+                  <MaterialCommunityIcons name={item.avatar_icon || 'account'} size={20} color="white" />
+                )}
               </View>
               <View>
                 <Text style={styles.userName}>{item.name}</Text>
@@ -119,6 +126,7 @@ const styles = StyleSheet.create({
   },
   userInfo: { flexDirection: 'row', alignItems: 'center' },
   avatarMini: { width: 35, height: 35, borderRadius: 17.5, justifyContent: 'center', alignItems: 'center', marginRight: 12 },
+  avatarImageFull: { width: '100%', height: '100%' },
   userName: { color: 'white', fontWeight: 'bold', fontSize: 16 },
   userEmail: { color: '#888', fontSize: 12 },
   emptyText: { color: '#555', textAlign: 'center', marginTop: 50, fontStyle: 'italic' },

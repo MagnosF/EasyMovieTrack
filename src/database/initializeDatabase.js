@@ -27,6 +27,13 @@ export async function initializeDatabase(database) {
       // Coluna já existe, ignora o erro
     }
 
+    // Migration para a coluna image (caso o banco já exista sem ela)
+    try {
+      await database.execAsync("ALTER TABLE users ADD COLUMN image TEXT;");
+    } catch (e) {
+      // Coluna já existe
+    }
+
     // 3. SEED: Cria um Admin padrão para testes da HU4
     await database.execAsync(`
       INSERT OR IGNORE INTO users (name, email, password, role, avatar_color, avatar_icon)

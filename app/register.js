@@ -20,6 +20,7 @@ export default function Register() {
       Alert.alert("Erro", "Preencha todos os campos!");
       return;
     }
+    // VALIDAÇÃO BÁSICA DE SEGURANÇA (HU1 e HU3): A senha deve ter pelo menos 6 caracteres
     if (password.length < 6) {
       Alert.alert("Erro", "A senha deve ter pelo menos 6 caracteres.");
       return;
