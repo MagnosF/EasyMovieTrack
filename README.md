@@ -1,50 +1,54 @@
-# Welcome to your Expo app 👋
+EasyMovieTrack - EPIC 1 🎬
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Este é o projeto de entrega da primeira etapa (EPIC 1) focado em gestão de usuários e persistência local.
 
-## Get started
+Desenvolvedor: Magno Ferreira Santos
 
-1. Install dependencies
+Disciplina: Projeto Aplicado em Desenvolvimento de Sistemas
 
-   ```bash
-   npm install
-   ```
+Tecnologias: React Native, Expo, SQLite.
 
-2. Start the app
+📌 Sobre o Projeto
 
-   ```bash
-   npx expo start
-   ```
+O EasyMovieTrack é um aplicativo de gestão de filmes que permite o controle personalizado de perfis de usuários. Nesta primeira entrega, o foco foi a segurança do sistema, a persistência de dados local e a customização da interface pelo usuário.
 
-In the output, you'll find options to open the app in a
+🚀 Funcionalidades (HUs)
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+HU1 & HU3 - Cadastro Seguro: Validação de formulários com requisitos mínimos de segurança (senhas com mais de 6 caracteres).
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+HU2 & HU5 - Personalização de Perfil: Escolha de cores, ícones e integração com a galeria do dispositivo para foto de perfil usando Expo Image Picker.
 
-## Get a fresh project
+HU4 - Painel Administrativo: Acesso restrito para visualização e gestão da lista de usuários cadastrados.
 
-When you're ready, run:
+Persistência Local: Banco de dados SQLite integrado para salvar as configurações de cada usuário de forma individual.
 
-```bash
-npm run reset-project
-```
+📦 Get started
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+Clone o repositório
 
-## Learn more
+git clone [https://github.com/MagnosF/EasyMovieTrack.git](https://github.com/MagnosF/EasyMovieTrack.git)
 
-To learn more about developing your project with Expo, look at the following resources:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+Instale as dependências
 
-## Join the community
+npm install
 
-Join our community of developers creating universal apps.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+Inicie o servidor do Expo
+
+npx expo start
+
+
+📱 Visualização
+
+No terminal, você encontrará opções para abrir o app em:
+
+Android emulator
+
+iOS simulator
+
+Expo Go, lendo o QR Code com a câmera do seu dispositivo.
+
+Nota: Certifique-se de que o computador e o celular estejam na mesma rede Wi-Fi para o funcionamento do Expo Go.
+
+Este projeto foi desenvolvido como parte dos requisitos avaliativos da EPIC 1.
