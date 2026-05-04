@@ -16,7 +16,7 @@ Este é o projeto de entrega da primeira etapa (**EPIC 1**) focado em gestão de
 
 ## 📌 Sobre o Projeto
 
-O **EasyMovieTrack** é um aplicativo de gestão de filmes que permite o controlo personalizado de perfis de utilizadores. Nesta primeira entrega, o foco foi a segurança do sistema, a persistência de dados local e a customização da interface pelo utilizador.
+O **EasyMovieTrack** é um aplicativo de gestão de filmes que permite o controle personalizado de perfis de utilizadores. Nesta primeira entrega, o foco foi a segurança do sistema, a persistência de dados local e a customização da interface pelo utilizador.
 
 ---
 
@@ -74,7 +74,7 @@ Siga os passos abaixo para configurar o ambiente e executar o projeto localmente
 
 ## 📱 Visualização
 
-- No terminal, você encontrará opções para abrir o app em:
+No terminal, você encontrará opções para abrir o app em:
 
 Android emulator
 
