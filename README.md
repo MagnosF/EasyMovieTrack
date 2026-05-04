@@ -1,47 +1,80 @@
-EasyMovieTrack - EPIC 1 🎬
+# EasyMovieTrack - EPIC 1 🎬
 
-Este é o projeto de entrega da primeira etapa (EPIC 1) focado em gestão de usuários e persistência local.
+<p align="center">
+  <img src="https://img.shields.io/badge/React__Native-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React Native" />
+  <img src="https://img.shields.io/badge/Expo-000020?style=for-the-badge&logo=expo&logoColor=white" alt="Expo" />
+  <img src="https://img.shields.io/badge/SQLite-003B57?style=for-the-badge&logo=sqlite&logoColor=white" alt="SQLite" />
+</p>
 
-Desenvolvedor: Magno Ferreira Santos
+Este é o projeto de entrega da primeira etapa (**EPIC 1**) focado em gestão de utilizadores e persistência local.
 
-Disciplina: Projeto Aplicado em Desenvolvimento de Sistemas
+**Desenvolvedor:** Magno Ferreira Santos  
+**Disciplina:** Projeto Aplicado em Desenvolvimento de Sistemas  
+**Tecnologias:** React Native, Expo, SQLite.
 
-Tecnologias: React Native, Expo, SQLite.
+---
 
-📌 Sobre o Projeto
+## 📌 Sobre o Projeto
 
-O EasyMovieTrack é um aplicativo de gestão de filmes que permite o controle personalizado de perfis de usuários. Nesta primeira entrega, o foco foi a segurança do sistema, a persistência de dados local e a customização da interface pelo usuário.
+O **EasyMovieTrack** é um aplicativo de gestão de filmes que permite o controlo personalizado de perfis de utilizadores. Nesta primeira entrega, o foco foi a segurança do sistema, a persistência de dados local e a customização da interface pelo utilizador.
 
-🚀 Funcionalidades (HUs)
+---
 
-HU1 & HU3 - Cadastro Seguro: Validação de formulários com requisitos mínimos de segurança (senhas com mais de 6 caracteres).
+## 🚀 Funcionalidades (HUs)
 
-HU2 & HU5 - Personalização de Perfil: Escolha de cores, ícones e integração com a galeria do dispositivo para foto de perfil usando Expo Image Picker.
+- **HU1 & HU3 - Registo Seguro:** Validação de formulários com requisitos mínimos de segurança (palavras-passe com mais de 6 caracteres).
+- **HU2 & HU5 - Personalização de Perfil:** Escolha de cores, ícones e integração com a galeria do dispositivo para foto de perfil usando [Expo Image Picker](https://docs.expo.dev/versions/latest/sdk/imagepicker/).
+- **HU4 - Painel Administrativo:** Acesso restrito para visualização e gestão da lista de utilizadores registados.
+- **Persistência Local:** Base de dados SQLite integrado para salvar as configurações de cada utilizador de forma individual.
 
-HU4 - Painel Administrativo: Acesso restrito para visualização e gestão da lista de usuários cadastrados.
+---
 
-Persistência Local: Banco de dados SQLite integrado para salvar as configurações de cada usuário de forma individual.
+## 🏗️ Arquitetura do Projeto
 
-📦 Get started
+Estrutura do projeto:
 
-Clone o repositório
+```text
+   EasyMovieTrack/
+   ├── app/                  # Sistema de Rotas (Expo Router)
+   │   ├── (tabs)/           # Movies, Profile (Navegação principal)
+   │   ├── admin-users.js    # Gestão de utilizadores (Admin)
+   │   ├── register.js       # Ecrã de registo
+   │   ├── forgot-password.js # Recuperação de senha pelo Email
+   │   └── index.js          # Ecrã de Login (Ponto de entrada)
+   ├── src/
+   │   ├── database/         # initializeDatabase.js (Configuração SQLite)
+   │   └── styles/           # globalStyles.ts (Estilização global da app)
+   ├── components/           # Componentes reutilizáveis
+   ├── hooks/                # Hooks de lógica de estado
+   └── constants/            # Constantes de design e cores
+```
 
-git clone [https://github.com/MagnosF/EasyMovieTrack.git](https://github.com/MagnosF/EasyMovieTrack.git)
+---
 
+## 📦 Get started
 
-Instale as dependências
+Siga os passos abaixo para configurar o ambiente e executar o projeto localmente:
 
-npm install
+1. **Clonar o repositório**
+   ```bash
+      git clone [https://github.com/MagnosF/EasyMovieTrack.git](https://github.com/MagnosF/EasyMovieTrack.git)
+   ```
+      
+2. **Instalar as dependências**
+   ```bash
+      npm install
+   ```
 
+3. **Iniciar o servidor do Expo**
+   ```bash
+      npx expo start
+   ```
 
-Inicie o servidor do Expo
+---
 
-npx expo start
+## 📱 Visualização
 
-
-📱 Visualização
-
-No terminal, você encontrará opções para abrir o app em:
+- No terminal, você encontrará opções para abrir o app em:
 
 Android emulator
 
@@ -49,6 +82,4 @@ iOS simulator
 
 Expo Go, lendo o QR Code com a câmera do seu dispositivo.
 
-Nota: Certifique-se de que o computador e o celular estejam na mesma rede Wi-Fi para o funcionamento do Expo Go.
-
-Este projeto foi desenvolvido como parte dos requisitos avaliativos da EPIC 1.
+- Nota: Certifique-se de que o computador e o celular estejam na mesma rede Wi-Fi para o funcionamento do Expo Go.
