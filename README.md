@@ -82,4 +82,4 @@ iOS simulator
 
 Expo Go, lendo o QR Code com a câmera do seu dispositivo.
 
-- Nota: Certifique-se de que o computador e o celular estejam na mesma rede Wi-Fi para o funcionamento do Expo Go.
+Nota: Certifique-se de que o computador e o celular estejam na mesma rede Wi-Fi para o funcionamento do Expo Go.
