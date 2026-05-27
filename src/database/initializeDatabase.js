@@ -34,13 +34,13 @@ export async function initializeDatabase(database) {
       // Coluna já existe
     }
 
-    // 3. SEED: Cria um Admin padrão para testes da HU4
+    // 3. SEED: Cria um Admin padrão para testes da HU4 (Configurado diretamente com o hash correto)
     await database.execAsync(`
       INSERT OR IGNORE INTO users (name, email, password, role, avatar_color, avatar_icon)
-      VALUES ('Comandante', 'admin@adm.com', '123456', 'admin', '#00E5FF', 'weather-lightning');
+      VALUES ('Comandante', 'admin@adm.com', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'admin', '#00E5FF', 'weather-lightning');
     `);
 
-    console.log("Banco de dados inicializado e atualizado com sucesso!");
+    console.log("Banco de dados inicializado com sucesso!");
   } catch (error) {
     console.error("Erro ao inicializar o banco:", error);
   }

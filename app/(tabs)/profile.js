@@ -1,4 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import * as Crypto from 'expo-crypto'; // criptografia da senha para segurança
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -36,7 +37,7 @@ export default function Profile() {
       if (params.userEmail) {
         const result = await db.getFirstAsync(
           'SELECT name, email, role, avatar_color, avatar_icon, image FROM users WHERE email = ?',
-          [params.userEmail]
+          [params.userEmail.trim()]
         );
         // Se os dados forem encontrados, atualiza o estado do usuário e as opções de personalização do avatar
         if (result) {
@@ -84,16 +85,25 @@ export default function Profile() {
   // Função para lidar com a atualização do perfil do usuário, incluindo validação de senha e atualização dos dados no banco de dados
   async function handleUpdateProfile() {
     // Validação simples para garantir que o nome não esteja vazio e que a nova senha, se fornecida, tenha pelo menos 6 caracteres   
+    if (!newName.trim()) return Alert.alert("Erro", "O nome não pode ficar vazio.");
+
     try {
       let query = `UPDATE users SET name = ?, avatar_color = ?, avatar_icon = ?, image = ?`;
-      let values = [newName, selectedColor, selectedIcon, userImage];
+      let values = [newName.trim(), selectedColor, selectedIcon, userImage];
 
       // Se o usuário forneceu uma nova senha, adiciona essa atualização à query SQL
       if (newPassword.trim().length > 0) {
         // Validação de senha: mínimo 6 caracteres
         if (newPassword.length < 6) return Alert.alert("Erro", "Senha muito fraca! Mínimo 6 caracteres.");
+        
+        // CRIPTOGRAFIA DA NOVA SENHA (Exigência do feedback): Aplica o SHA-256 antes de salvar
+        const hashedNewPassword = await Crypto.digestStringAsync(
+          Crypto.CryptoDigestAlgorithm.SHA256,
+          newPassword.trim()
+        );
+
         query += `, password = ?`;
-        values.push(newPassword);
+        values.push(hashedNewPassword);
       }
       
       // Finaliza a query SQL adicionando a condição para atualizar apenas o usuário atual
@@ -103,8 +113,9 @@ export default function Profile() {
       await db.runAsync(query, values);
 
       // Atualiza o estado do usuário com as novas informações para refletir as mudanças na interface
-      if (user) setUser({ ...user, name: newName, avatar_color: selectedColor, avatar_icon: selectedIcon, image: userImage });
+      if (user) setUser({ ...user, name: newName.trim(), avatar_color: selectedColor, avatar_icon: selectedIcon, image: userImage });
       setIsEditing(false);
+      setNewPassword(''); // Limpa o campo de nova senha após a atualização
       Alert.alert("Sucesso", "Perfil atualizado com sucesso!");
     } catch (error) { Alert.alert("Erro", "A conexão caiu..."); }
   }

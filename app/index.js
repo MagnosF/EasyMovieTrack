@@ -1,3 +1,4 @@
+import * as Crypto from 'expo-crypto'; //criptografia da senha para segurança
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
@@ -17,11 +18,23 @@ export default function Login() {
   async function handleLogin() {
     if (!email || !password) return Alert.alert("Erro", "Preencha todos os campos.");
     
-    // Consulta ao banco de dados para verificar se existe um usuário com o e-mail e senha fornecidos
+    // Consulta ao banco dados para verificar se existe um usuário com o e-mail e senha fornecidos
     try {
+      // Garante que o e-mail do login também fique todo minúsculo para bater com o banco
+      const emailLimpo = email.trim().toLowerCase();
+
+      // CRIPTOGRAFIA DA SENHA (Exigência do feedback): Transforma a senha digitada em Hash SHA-256
+      const hashedPassword = await Crypto.digestStringAsync(
+        Crypto.CryptoDigestAlgorithm.SHA256,
+        password.trim()
+      );
+
+      console.log("Hash gerado no login:", hashedPassword);
+
+      // Consulta ao banco de dados usando o hash gerado para verificar as credenciais do usuário
       const user = await db.getFirstAsync(
         'SELECT * FROM users WHERE email = ? AND password = ?',
-        [email, password]
+        [emailLimpo, hashedPassword]
       );
       
       // Se um usuário for encontrado, redireciona para a tela de perfil passando o e-mail do usuário como parâmetro
@@ -43,15 +56,17 @@ export default function Login() {
         style={globalStyles.input} 
         placeholder="E-mail" 
         placeholderTextColor={Theme.colors.textSecondary} 
-        onChangeText={setEmail} 
+        onChangeText={(text) => setEmail(text)} 
         autoCapitalize="none" 
+        value={email} 
       />
       <TextInput 
         style={globalStyles.input} 
         placeholder="Senha" 
         placeholderTextColor={Theme.colors.textSecondary} 
-        onChangeText={setPassword} 
+        onChangeText={(text) => setPassword(text)} 
         secureTextEntry 
+        value={password} 
       />
 
       <TouchableOpacity style={globalStyles.buttonPrimary} onPress={handleLogin}>
