@@ -1,6 +1,6 @@
 export async function initializeDatabase(database) {
   try {
-    // 🎬 CRIAR TABELA DE FILMES
+    // 🎬 CRIAR TABELA DE FILMES (Geral)
     await database.execAsync(`
       CREATE TABLE IF NOT EXISTS movies (
         id INTEGER PRIMARY KEY,
@@ -11,7 +11,7 @@ export async function initializeDatabase(database) {
       );
     `);
 
-    // 1. Cria a tabela de usuários se ela não existir
+    // 👤 CRIAR TABELA DE USUÁRIOS
     await database.execAsync(`
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,6 +22,21 @@ export async function initializeDatabase(database) {
         image TEXT,
         avatar_color TEXT DEFAULT '#00E5FF',
         avatar_icon TEXT DEFAULT 'weather-lightning'
+      );
+    `);
+
+    //7️⃣ CRIAR TABELA DE FILMES ASSISTIDOS / AVALIAÇÕES (HU 7, HU 8, HU 9, HU 10)
+    // Vincula o ID do usuário ao ID do filme, além de guardar notas e comentários
+    await database.execAsync(`
+      CREATE TABLE IF NOT EXISTS user_movies (
+        user_id INTEGER NOT NULL,
+        movie_id INTEGER NOT NULL,
+        watched INTEGER DEFAULT 1, -- 1 para assistido, 0 para não assistido
+        rating REAL,                -- Guarda a avaliação por estrelas (ex: 4.5)
+        review TEXT,                -- Guarda o comentário/crítica escrito
+        watched_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (user_id, movie_id),
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
       );
     `);
 

@@ -1,11 +1,13 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import React, { useEffect, useRef, useState } from 'react';
-import { ActivityIndicator, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { useSQLiteContext } from 'expo-sqlite';
+import { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Theme } from '../../constants/theme';
 import { getMoviesByAvailability, getMoviesByGenreOnline, getPopularMovies, getTrendingMovies, searchMoviesOnline } from '../../src/services/api';
+import { AuthSession } from '../../src/services/authSession';
+import { toggleWatchedMovie } from '../../src/services/movieStorage';
 import { globalStyles } from '../../src/styles/globalStyles';
 
-// 🎬 TELA DE FILMES: Busca, Filtros por Gênero, Tendências e Disponibilidade
 const LISTA_GENEROS = [
   { id: null, name: '🔥 Todos', icon: 'star-four-points' },
   { id: 28, name: 'Ação', icon: 'sword' },
@@ -17,24 +19,63 @@ const LISTA_GENEROS = [
   { id: 16, name: 'Animação', icon: 'animation' }
 ];
 
-
 export default function Movies() {
-  // 🎯 ESTADOS PRINCIPAIS: Filmes, Carregamento, Página, Busca e Filtros
+  const db = useSQLiteContext();
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState(""); 
   const [selectedGenre, setSelectedGenre] = useState(null);
-  // 🌟 ESTADOS SECUNDÁRIOS: Tendências e Disponibilidade para a Home
+  
   const [trendingMovies, setTrendingMovies] = useState([]);
   const [trendingTab, setTrendingTab] = useState('day'); 
 
   const [availMovies, setAvailMovies] = useState([]);
   const [availTab, setAvailTab] = useState('streaming'); 
-  // 🎬 REFERÊNCIA PARA SCROLL: Usada para voltar ao topo quando muda de página ou filtro
+  
+  // 7️⃣ ESTADO HISTÓRICO: Guarda a lista de IDs de filmes que o usuário já marcou como assistidos
+  const [watchedMovieIds, setWatchedMovieIds] = useState([]);
+
   const scrollViewRef = useRef(null);
   const exibindoHomePrincipal = searchQuery.trim() === "" && selectedGenre === null;
-  // 🎯 EFEITOS DE CARREGAMENTO: Um para a Home Principal e outro para buscas/filtros específicos
+
+  // 7️⃣ Função para carregar a lista de IDs assistidos do banco de dados local
+  async function carregarFilmesAssistidos() {
+    try {
+      const resultado = await db.getAllAsync(
+        "SELECT movie_id FROM user_movies WHERE user_id = ? AND watched = 1;",
+        [AuthSession.userId]
+      );
+      // Converte o array de objetos [{movie_id: 123}] em um array de números simples [123, 456]
+      const ids = resultado.map(item => item.movie_id);
+      setWatchedMovieIds(ids);
+    } catch (error) {
+      console.error("Erro ao carregar lista de assistidos do banco:", error);
+    }
+  }
+
+  // 7️⃣ Função de clique no botão de Assistido
+  async function handleToggleWatched(movie) {
+    try {
+      // Executa a função do nosso serviço passando os parâmetros corretos
+      const foiAdicionado = await toggleWatchedMovie(db, AuthSession.userId, movie);
+      
+      // Atualiza o estado da tela instantaneamente sem precisar recarregar o app
+      if (foiAdicionado) {
+        setWatchedMovieIds(prev => [...prev, movie.id]);
+      } else {
+        setWatchedMovieIds(prev => prev.filter(id => id !== movie.id));
+      }
+    } catch (error) {
+      console.error("Erro ao alternar status do filme:", error);
+    }
+  }
+
+  // Carrega os assistidos assim que a tela abrir
+  useEffect(() => {
+    carregarFilmesAssistidos();
+  }, []);
+
   useEffect(() => {
     async function carregarFilmesFiltrados() {
       if (exibindoHomePrincipal) return; 
@@ -56,7 +97,7 @@ export default function Movies() {
     }
     carregarFilmesFiltrados();
   }, [page, searchQuery, selectedGenre]);
-  // EFEITO DE CARREGAMENTO PARA A HOME PRINCIPAL: Tendências e Disponibilidade
+
   useEffect(() => {
     async function carregarDadosHome() {
       if (!exibindoHomePrincipal) return;
@@ -78,40 +119,57 @@ export default function Movies() {
     }
     carregarDadosHome();
   }, [exibindoHomePrincipal, trendingTab, availTab]);
-  // FUNÇÕES DE NAVEGAÇÃO DE PÁGINA
+
   const avancarPagina = () => setPage((prev) => prev + 1);
   const voltarPagina = () => setPage((prev) => (prev > 1 ? prev - 1 : 1));
-  // RENDERIZAÇÃO DO CARROSSEL HORIZONTAL: Reutilizado para Tendências e Disponibilidade
+
+  // RENDERIZAÇÃO DO CARROSSEL HORIZONTAL
   const RenderCarrosselHorizontal = ({ data }) => (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={globalStyles.horizontalScroll}>
-      {data.map((item) => (
-        <View key={item.id} style={globalStyles.miniCard}>
-          {item.poster_path ? (
-            <Image source={{ uri: `https://image.tmdb.org/t/p/w200${item.poster_path}` }} style={globalStyles.miniPoster} />
-          ) : (
-            <View style={[globalStyles.miniPoster, globalStyles.miniPlaceholder]}>
-              <MaterialCommunityIcons name="movie-open" size={24} color={Theme.colors.textSecondary} />
-            </View>
-          )}
-          <Text style={globalStyles.miniTitle} numberOfLines={1}>{item.title}</Text>
-          <Text style={globalStyles.miniNote}>⭐ {item.vote_average ? item.vote_average.toFixed(1) : 'N/A'}</Text>
-        </View>
-      ))}
+      {data.map((item) => {
+        const jaAssistiu = watchedMovieIds.includes(item.id);
+        return (
+          <View key={item.id} style={globalStyles.miniCard}>
+            {item.poster_path ? (
+              <Image source={{ uri: `https://image.tmdb.org/t/p/w200${item.poster_path}` }} style={globalStyles.miniPoster} />
+            ) : (
+              <View style={[globalStyles.miniPoster, globalStyles.miniPlaceholder]}>
+                <MaterialCommunityIcons name="movie-open" size={24} color={Theme.colors.textSecondary} />
+              </View>
+            )}
+            
+            {/* 🍿 Botão flutuante de assistido para itens do carrossel horizontal */}
+            <TouchableOpacity 
+              style={[globalStyles.floatingMiniCheck, jaAssistiu && { backgroundColor: Theme.colors.primary }]}
+              onPress={() => handleToggleWatched(item)}
+            >
+              <MaterialCommunityIcons 
+                name={jaAssistiu ? "eye" : "eye-off-outline"} 
+                size={14} 
+                color={jaAssistiu ? "#000" : Theme.colors.textSecondary} 
+              />
+            </TouchableOpacity>
+
+            <Text style={globalStyles.miniTitle} numberOfLines={1}>{item.title}</Text>
+            <Text style={globalStyles.miniNote}>⭐ {item.vote_average ? item.vote_average.toFixed(1) : 'N/A'}</Text>
+          </View>
+        );
+      })}
     </ScrollView>
   );
 
   return (
-    <ScrollView ref={scrollViewRef} style={{ backgroundColor: Theme.colors.background }} contentContainerStyle={styles.container}>
-      <View style={styles.header}>
-        <MaterialCommunityIcons name="weather-lightning" size={38} color={Theme.colors.primary} style={styles.headerIcon} />
-        <Text style={[globalStyles.title, styles.titleOverride]}>FILMES</Text>
+    <ScrollView ref={scrollViewRef} style={{ backgroundColor: Theme.colors.background }} contentContainerStyle={globalStyles.containerLayout}>
+      <View style={globalStyles.headerRow}>
+        <MaterialCommunityIcons name="weather-lightning" size={38} color={Theme.colors.primary} style={globalStyles.headerIcon} />
+        <Text style={[globalStyles.title, globalStyles.titleOverride]}>FILMES</Text>
       </View>
-      <Text style={globalStyles.linkText}>Explore o catálogo completo de filmes online.</Text>
+      <Text style={globalStyles.linkText}>Explore o catálogo completo de filmes.</Text>
 
-      <View style={[globalStyles.input, styles.searchContainer]}>
-        <MaterialCommunityIcons name="magnify" size={22} color={Theme.colors.textSecondary} style={styles.searchIcon} />
+      <View style={[globalStyles.input, globalStyles.searchContainer]}>
+        <MaterialCommunityIcons name="magnify" size={22} color={Theme.colors.textSecondary} style={globalStyles.searchIcon} />
         <TextInput
-          style={styles.searchInput}
+          style={globalStyles.searchInput}
           placeholder="Pesquisar filmes online..."
           placeholderTextColor={Theme.colors.textSecondary}
           value={searchQuery}
@@ -123,14 +181,14 @@ export default function Movies() {
         />
       </View>
 
-      <View style={styles.genreWrapper}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.genreScroll}>
+      <View style={globalStyles.genreWrapper}>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={globalStyles.genreScroll}>
           {LISTA_GENEROS.map((genre) => {
             const isSelected = selectedGenre === genre.id && searchQuery.trim() === "";
             return (
               <TouchableOpacity
                 key={genre.id ?? 'todos'}
-                style={[styles.genreChip, isSelected && { backgroundColor: Theme.colors.primary, borderColor: Theme.colors.primary }]}
+                style={[globalStyles.genreChip, isSelected && { backgroundColor: Theme.colors.primary, borderColor: Theme.colors.primary }]}
                 onPress={() => {
                   setSearchQuery("");
                   setSelectedGenre(genre.id);
@@ -138,7 +196,7 @@ export default function Movies() {
                 }}
               >
                 <MaterialCommunityIcons name={genre.icon} size={16} color={isSelected ? '#000' : Theme.colors.textSecondary} style={{ marginRight: 6 }} />
-                <Text style={[styles.genreText, isSelected && { color: '#000', fontWeight: 'bold' }]}>{genre.name}</Text>
+                <Text style={[globalStyles.genreText, isSelected && { color: '#000', fontWeight: 'bold' }]}>{genre.name}</Text>
               </TouchableOpacity>
             );
           })}
@@ -188,22 +246,42 @@ export default function Movies() {
         </View>
       ) : (
         <View style={{ width: '100%' }}>
-          {movies.map((movie) => (
-            <View key={movie.id} style={globalStyles.movieCard}>
-              {movie.poster_path ? (
-                <Image source={{ uri: `https://image.tmdb.org/t/p/w200${movie.poster_path}` }} style={globalStyles.posterImage} />
-              ) : (
-                <View style={globalStyles.posterPlaceholder}>
-                  <MaterialCommunityIcons name="movie-open-play" size={40} color={Theme.colors.textSecondary} />
+          {movies.map((movie) => {
+            // 7️⃣ Verifica se este filme específico da iteração está na lista de assistidos
+            const jaAssistiu = watchedMovieIds.includes(movie.id);
+
+            return (
+              <View key={movie.id} style={globalStyles.movieCard}>
+                {movie.poster_path ? (
+                  <Image source={{ uri: `https://image.tmdb.org/t/p/w200${movie.poster_path}` }} style={globalStyles.posterImage} />
+                ) : (
+                  <View style={globalStyles.posterPlaceholder}>
+                    <MaterialCommunityIcons name="movie-open-play" size={40} color={Theme.colors.textSecondary} />
+                  </View>
+                )}
+                <View style={globalStyles.movieInfo}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
+                    <Text style={[globalStyles.movieTitle, { flex: 1, paddingRight: 8 }]} numberOfLines={2}>{movie.title}</Text>
+                    
+                    {/* 7️⃣ ÍCONE INTERATIVO DE ASSISTIDO MIGRADO PARA GLOBAL */}
+                    <TouchableOpacity 
+                      style={[globalStyles.actionButton, jaAssistiu && globalStyles.actionButtonActive]} 
+                      onPress={() => handleToggleWatched(movie)}
+                    >
+                      <MaterialCommunityIcons 
+                        name={jaAssistiu ? "eye" : "eye-outline"} 
+                        size={22} 
+                        color={jaAssistiu ? Theme.colors.primary : Theme.colors.textSecondary} 
+                      />
+                    </TouchableOpacity>
+                  </View>
+
+                  <Text style={globalStyles.movieYear}>Lançamento: {movie.release_date ? movie.release_date.split('-')[0] : 'N/A'}</Text>
+                  <Text style={globalStyles.movieOverview} numberOfLines={3}>{movie.overview || "Sinopse não disponível."}</Text>
                 </View>
-              )}
-              <View style={globalStyles.movieInfo}>
-                <Text style={globalStyles.movieTitle} numberOfLines={2}>{movie.title}</Text>
-                <Text style={globalStyles.movieYear}>Lançamento: {movie.release_date ? movie.release_date.split('-')[0] : 'N/A'}</Text>
-                <Text style={globalStyles.movieOverview} numberOfLines={3}>{movie.overview || "Sinopse não disponível."}</Text>
               </View>
-            </View>
-          ))}
+            );
+          })}
 
           {!exibindoHomePrincipal && (
             <View style={globalStyles.paginationContainer}>
@@ -223,19 +301,3 @@ export default function Movies() {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: { padding: Theme.spacing.lg, paddingTop: 60, alignItems: 'center' },
-  header: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', marginBottom: 5 },
-  headerIcon: { textShadowColor: Theme.colors.primary, textShadowOffset: { width: 0, height: 0 }, textShadowRadius: 10 },
-  titleOverride: { marginBottom: 0, marginLeft: 10, textAlign: 'left' },
-  
-  searchContainer: { flexDirection: 'row', alignItems: 'center', width: '100%', height: 50, paddingVertical: 0, paddingHorizontal: 12, marginTop: 20, marginBottom: 15 },
-  searchIcon: { marginRight: 8 },
-  searchInput: { flex: 1, color: Theme.colors.text, fontSize: 15, height: '100%' },
-  
-  genreWrapper: { width: '100%', marginBottom: 20 },
-  genreScroll: { paddingRight: 20 },
-  genreChip: { flexDirection: 'row', alignItems: 'center', backgroundColor: Theme.colors.surface, paddingHorizontal: 14, paddingVertical: 8, borderRadius: Theme.radius.md, marginRight: 10, borderWidth: 1, borderColor: '#2D333B' },
-  genreText: { color: Theme.colors.textSecondary, fontSize: 13 },
-});

@@ -1,10 +1,12 @@
-import * as Crypto from 'expo-crypto'; //criptografia da senha para segurança
+import * as Crypto from 'expo-crypto'; // criptografia da senha para segurança
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
 import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Theme } from '../constants/theme';
 import { globalStyles } from '../src/styles/globalStyles';
+//Importa o gerenciador de sessão para salvar quem logou
+import { AuthSession } from '../src/services/authSession';
 
 // Tela de login, onde o usuário pode inserir seu e-mail e senha para acessar sua conta ou navegar para as telas de recuperação de senha e registro
 export default function Login() {
@@ -37,8 +39,14 @@ export default function Login() {
         [emailLimpo, hashedPassword]
       );
       
-      // Se um usuário for encontrado, redireciona para a tela de perfil passando o e-mail do usuário como parâmetro
+      // Se um usuário for encontrado, salva seus dados na sessão e redireciona
       if (user) {
+        // 🍿 7️⃣ SALVA A SESSÃO: Guarda o ID e o Email do usuário real para a tela de filmes saber quem ele é
+        AuthSession.userId = user.id;
+        AuthSession.userEmail = user.email;
+
+        console.log(`Usuário conectado com sucesso! ID: ${user.id}, Nome: ${user.name}`);
+
         router.replace(`/(tabs)/profile?userEmail=${user.email}`); 
       } else {
         Alert.alert("Erro", "E-mail ou senha incorretos.");

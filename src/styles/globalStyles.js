@@ -2,12 +2,28 @@ import { StyleSheet } from 'react-native';
 import { Theme } from '../../constants/theme';
 
 export const globalStyles = StyleSheet.create({
-  // 🌐 Estilos Globais
+  // 🌐 LAYOUT GERAL & ESTILOS BASE
   safeArea: {
     flex: 1,
     backgroundColor: Theme.colors.background,
     justifyContent: 'center',
     padding: Theme.spacing.lg,
+  },
+  containerLayout: { 
+    padding: Theme.spacing.lg, 
+    paddingTop: 60, 
+    alignItems: 'center' 
+  },
+  headerRow: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    justifyContent: 'center', 
+    marginBottom: 5 
+  },
+  headerIcon: { 
+    textShadowColor: Theme.colors.primary, 
+    textShadowOffset: { width: 0, height: 0 }, 
+    textShadowRadius: 10 
   },
   title: {
     fontSize: 32,
@@ -20,6 +36,13 @@ export const globalStyles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 10,
   },
+  titleOverride: { 
+    marginBottom: 0, 
+    marginLeft: 10, 
+    textAlign: 'left' 
+  },
+
+  // 🔍 INPUTS & COMPONENTES DE BUSCA
   input: {
     backgroundColor: Theme.colors.surface,
     color: Theme.colors.text,
@@ -29,6 +52,51 @@ export const globalStyles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#2D333B',
   },
+  searchContainer: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    width: '100%', 
+    height: 50, 
+    paddingVertical: 0, 
+    paddingHorizontal: 12, 
+    marginTop: 20, 
+    marginBottom: 15 
+  },
+  searchIcon: { 
+    marginRight: 8 
+  },
+  searchInput: { 
+    flex: 1, 
+    color: Theme.colors.text, 
+    fontSize: 15, 
+    height: '100%' 
+  },
+
+  // 🏷️ CHIPS DE GÊNERO / FILTROS RAPIDOS
+  genreWrapper: { 
+    width: '100%', 
+    marginBottom: 20 
+  },
+  genreScroll: { 
+    paddingRight: 20 
+  },
+  genreChip: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    backgroundColor: Theme.colors.surface, 
+    paddingHorizontal: 14, 
+    paddingVertical: 8, 
+    borderRadius: Theme.radius.md, 
+    marginRight: 10, 
+    borderWidth: 1, 
+    borderColor: '#2D333B' 
+  },
+  genreText: { 
+    color: Theme.colors.textSecondary, 
+    fontSize: 13 
+  },
+
+  //  BUTTONS
   buttonPrimary: {
     backgroundColor: Theme.colors.primary,
     padding: 15,
@@ -52,40 +120,7 @@ export const globalStyles = StyleSheet.create({
     marginTop: 15,
   },
 
-  // 🔢 Bloco de Paginação Global
-  paginationContainer: { 
-    flexDirection: 'row', 
-    justifyContent: 'space-between', 
-    alignItems: 'center', 
-    marginTop: 15, 
-    marginBottom: 30, 
-    width: '100%' 
-  },
-  pageButton: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    paddingVertical: 10, 
-    paddingHorizontal: 15, 
-    borderRadius: 8, 
-    elevation: 2 
-  },
-  pageButtonText: { 
-    fontSize: 14, 
-    fontWeight: '600' 
-  },
-  pageIndicator: { 
-    width: 36, 
-    height: 36, 
-    borderRadius: 18, 
-    justifyContent: 'center', 
-    alignItems: 'center' 
-  },
-  pageIndicatorText: { 
-    fontWeight: 'bold', 
-    fontSize: 15 
-  },
-
-  // 🎬 NOVO: CARDS VERTICAIS DE FILME (Usado no feed principal e buscas)
+  // 🎬 CARDS VERTICAIS DE FILME (Catálogo principal e futuro Histórico)
   movieCard: { 
     width: '100%', 
     backgroundColor: Theme.colors.surface, 
@@ -134,7 +169,31 @@ export const globalStyles = StyleSheet.create({
     lineHeight: 16 
   },
 
-  // 🎞️ NOVO: CARROSSEL HORIZONTAL (Estilo Netflix/TMDB)
+  // 🍿 INTERAÇÃO DE FILMES (HU 7 - Botão Assistido / Olho)
+  actionButton: {
+    padding: 6,
+    borderRadius: 8,
+    backgroundColor: 'transparent',
+  },
+  actionButtonActive: {
+    backgroundColor: 'rgba(0, 229, 255, 0.1)', // Destaque sutil azul/ciano
+  },
+  floatingMiniCheck: {
+    position: 'absolute',
+    top: 6,
+    right: 6,
+    zIndex: 10,
+    backgroundColor: 'rgba(0,0,0,0.7)',
+    borderRadius: 12,
+    width: 24,
+    height: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: '#2D333B'
+  },
+
+  // 🎞️ CARROSSEL HORIZONTAL (Estilo Netflix/Tendências)
   horizontalScroll: { 
     paddingRight: 20 
   },
@@ -168,7 +227,7 @@ export const globalStyles = StyleSheet.create({
     marginTop: 1 
   },
 
-  // 🎛️ NOVO: SELETORES (TOGGLES) E SEÇÕES da HOME
+  // 🎛️ SELETORES (TOGGLES) E SEÇÕES DA HOME
   sectionHeaderContainer: { 
     flexDirection: 'row', 
     width: '100%', 
@@ -229,7 +288,40 @@ export const globalStyles = StyleSheet.create({
     fontWeight: 'bold' 
   },
 
-  // Loading padrão de listas
+  // 🔢 BLOCO DE PAGINAÇÃO GLOBAL
+  paginationContainer: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    marginTop: 15, 
+    marginBottom: 30, 
+    width: '100%' 
+  },
+  pageButton: { 
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    paddingVertical: 10, 
+    paddingHorizontal: 15, 
+    borderRadius: 8, 
+    elevation: 2 
+  },
+  pageButtonText: { 
+    fontSize: 14, 
+    fontWeight: '600' 
+  },
+  pageIndicator: { 
+    width: 36, 
+    height: 36, 
+    borderRadius: 18, 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
+  pageIndicatorText: { 
+    fontWeight: 'bold', 
+    fontSize: 15 
+  },
+
+  // ⏳ LOADINGS PADRÃO
   loadingContainer: { 
     marginVertical: 40, 
     alignItems: 'center', 
@@ -240,5 +332,99 @@ export const globalStyles = StyleSheet.create({
     marginTop: 15, 
     fontSize: 14, 
     textAlign: 'center' 
+  },
+
+  // 👤 PERFIL & AVATARES (Novas chaves adicionadas para unificação)
+  headerCenter: { 
+    alignItems: 'center' 
+  },
+  headerRowLeft: {
+    flexDirection: 'row', 
+    alignItems: 'center', 
+    marginBottom: 10, 
+    marginTop: 20 
+  },
+  backButton: { 
+    marginRight: 15 
+  },
+  avatarCircle: { 
+    width: 120, 
+    height: 120, 
+    borderRadius: 60, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    marginBottom: 25, 
+    elevation: 15, 
+    shadowOpacity: 0.8, 
+    shadowRadius: 20, 
+    overflow: 'hidden' 
+  },
+  avatarImage: { 
+    width: '100%', 
+    height: '100%' 
+  },
+  cameraBadge: { 
+    position: 'absolute', 
+    bottom: 0, 
+    backgroundColor: 'rgba(0,0,0,0.5)', 
+    width: '100%', 
+    alignItems: 'center', 
+    padding: 2 
+  },
+  labelForm: { 
+    color: Theme.colors.primary, 
+    fontSize: 12, 
+    fontWeight: '900', 
+    marginBottom: 10, 
+    marginTop: 10, 
+    letterSpacing: 1 
+  },
+  rowFlex: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    marginBottom: 20 
+  },
+  colorDot: { 
+    width: 35, 
+    height: 35, 
+    borderRadius: 18 
+  },
+  iconBox: { 
+    width: 45, 
+    height: 45, 
+    borderRadius: 10, 
+    justifyContent: 'center', 
+    alignItems: 'center' 
+  },
+  
+  // 🚪 BOTÕES DE BORDA / AÇÕES SECUNDÁRIAS (Sair, Banir, Parcerias)
+  outlineBtn: { 
+    marginTop: 20, 
+    padding: 15, 
+    width: '100%', 
+    alignItems: 'center', 
+    borderWidth: 1, 
+    borderRadius: 12 
+  },
+
+  // 👥 LISTAS DE USUÁRIOS / CARDS DE ADMINISTRAÇÃO
+  userCardLayout: { 
+    flexDirection: 'row', 
+    justifyContent: 'space-between', 
+    alignItems: 'center', 
+    backgroundColor: Theme.colors.surface, 
+    padding: 15, 
+    borderRadius: 12, 
+    marginBottom: 10,
+    borderWidth: 1,
+    borderColor: '#2D333B'
+  },
+  avatarMini: { 
+    width: 35, 
+    height: 35, 
+    borderRadius: 17.5, 
+    justifyContent: 'center', 
+    alignItems: 'center', 
+    marginRight: 12 
   },
 });

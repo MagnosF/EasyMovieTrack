@@ -4,7 +4,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
-import { Alert, Image, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Theme } from '../../constants/theme';
 import { globalStyles } from '../../src/styles/globalStyles';
 
@@ -33,13 +33,11 @@ export default function Profile() {
   // Função para carregar os dados do usuário a partir do banco de dados usando o e-mail passado como parâmetro
   async function loadUserData() {
     try {
-      // Verifica se o e-mail do usuário foi passado como parâmetro e busca os dados correspondentes no banco de dados
       if (params.userEmail) {
         const result = await db.getFirstAsync(
           'SELECT name, email, role, avatar_color, avatar_icon, image FROM users WHERE email = ?',
           [params.userEmail.trim()]
         );
-        // Se os dados forem encontrados, atualiza o estado do usuário e as opções de personalização do avatar
         if (result) {
           setUser(result);
           setNewName(result.name);
@@ -51,7 +49,6 @@ export default function Profile() {
     } catch (error) { console.error(error); }
   }
 
-  // Carrega os dados do usuário quando o componente é montado ou quando o e-mail do usuário nos parâmetros de rota muda
   useEffect(() => { loadUserData(); }, [params.userEmail]);
 
   // Função para abrir a galeria e selecionar uma foto
@@ -61,7 +58,6 @@ export default function Profile() {
       return Alert.alert("Permissão", "Precisamos de acesso à galeria.");
     }
 
-    // Abre a galeria para o usuário escolher uma imagem, com opções de edição e qualidade reduzida para otimizar o armazenamento
     let result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ['images'],
       allowsEditing: true,
@@ -82,21 +78,17 @@ export default function Profile() {
     ]);
   }
 
-  // Função para lidar com a atualização do perfil do usuário, incluindo validação de senha e atualização dos dados no banco de dados
+  // Função para lidar com a atualização do perfil do usuário
   async function handleUpdateProfile() {
-    // Validação simples para garantir que o nome não esteja vazio e que a nova senha, se fornecida, tenha pelo menos 6 caracteres   
     if (!newName.trim()) return Alert.alert("Erro", "O nome não pode ficar vazio.");
 
     try {
       let query = `UPDATE users SET name = ?, avatar_color = ?, avatar_icon = ?, image = ?`;
       let values = [newName.trim(), selectedColor, selectedIcon, userImage];
 
-      // Se o usuário forneceu uma nova senha, adiciona essa atualização à query SQL
       if (newPassword.trim().length > 0) {
-        // Validação de senha: mínimo 6 caracteres
         if (newPassword.length < 6) return Alert.alert("Erro", "Senha muito fraca! Mínimo 6 caracteres.");
         
-        // CRIPTOGRAFIA DA NOVA SENHA (Exigência do feedback): Aplica o SHA-256 antes de salvar
         const hashedNewPassword = await Crypto.digestStringAsync(
           Crypto.CryptoDigestAlgorithm.SHA256,
           newPassword.trim()
@@ -106,70 +98,67 @@ export default function Profile() {
         values.push(hashedNewPassword);
       }
       
-      // Finaliza a query SQL adicionando a condição para atualizar apenas o usuário atual
       query += ` WHERE email = ?`;
       values.push(user?.email);
 
       await db.runAsync(query, values);
 
-      // Atualiza o estado do usuário com as novas informações para refletir as mudanças na interface
       if (user) setUser({ ...user, name: newName.trim(), avatar_color: selectedColor, avatar_icon: selectedIcon, image: userImage });
       setIsEditing(false);
-      setNewPassword(''); // Limpa o campo de nova senha após a atualização
-      Alert.alert("Sucesso", "Perfil atualizado com sucesso!");
+      setNewPassword(''); 
+      Alert.alert("Sucesso", "Perfil updated com sucesso!");
     } catch (error) { Alert.alert("Erro", "A conexão caiu..."); }
   }
 
   return (
     <ScrollView style={{backgroundColor: Theme.colors.background}} contentContainerStyle={{ padding: 20, paddingTop: 60 }}>
-      <View style={styles.header}>
+      <View style={globalStyles.headerCenter}>
         
-        {/* Avatar com Brilho Exterior (Glow) - Atualizado para suportar Imagem */}
+        {/* Avatar com Brilho Exterior (Glow) usando globalStyles */}
         <TouchableOpacity onPress={isEditing ? pickImage : null} activeOpacity={0.8}>
-          <View style={[styles.avatarCircle, { backgroundColor: selectedColor, shadowColor: selectedColor }]}>
+          <View style={[globalStyles.avatarCircle, { backgroundColor: selectedColor, shadowColor: selectedColor }]}>
             {userImage ? (
-              <Image source={{ uri: userImage }} style={styles.avatarImage} />
+              <Image source={{ uri: userImage }} style={globalStyles.avatarImage} />
             ) : (
               <MaterialCommunityIcons name={selectedIcon} size={60} color={selectedColor === '#FFFFFF' ? '#000' : 'white'} />
             )}
-            {/* Exibe o ícone de câmera apenas no modo de edição para indicar que o usuário pode alterar a foto do perfil, seja escolhendo uma nova imagem ou removendo a existente para voltar ao avatar padrão */}
             {isEditing && (
-              <View style={styles.cameraBadge}>
+              <View style={globalStyles.cameraBadge}>
                 <MaterialCommunityIcons name="camera" size={18} color="white" />
               </View>
             )}
           </View>
         </TouchableOpacity>
-        {/* Exibe o cargo do usuário para facilitar identificação do Admin, mesmo fora do modo de edição */}
+
         {user?.role && (
           <Text style={{ color: Theme.colors.primary, fontSize: 10, fontWeight: 'bold', marginBottom: 20 }}>
             {user.role.toUpperCase()}
           </Text>
         )}
+
         {isEditing ? (
           <View style={{ width: '100%' }}>
-            {/*Botão para remover a foto da galeria e voltar a usar o avatar padrão, apenas se uma foto estiver atualmente definida*/}
             <TouchableOpacity onPress={() => setUserImage(null)}>
                <Text style={{color: Theme.colors.danger, textAlign: 'center', marginBottom: 15, fontSize: 12, fontWeight: 'bold'}}>REMOVER FOTO E USAR AVATAR</Text>
             </TouchableOpacity>
-            {/* Seção de personalização do avatar, permitindo ao usuário escolher entre diferentes cores e ícones para seu perfil */}
-            <Text style={styles.label}>COR:</Text>
-            <View style={styles.row}>
+
+            <Text style={globalStyles.labelForm}>COR:</Text>
+            <View style={globalStyles.rowFlex}>
               {COLORS.map(color => (
                 <TouchableOpacity 
                   key={color} 
-                  style={[styles.colorDot, { backgroundColor: color, borderColor: 'white', borderWidth: selectedColor === color ? 2 : 0 }]} 
+                  style={[globalStyles.colorDot, { backgroundColor: color, borderColor: 'white', borderWidth: selectedColor === color ? 2 : 0 }]} 
                   onPress={() => setSelectedColor(color)}
                 />
               ))}
             </View>
 
-            <Text style={styles.label}>ÍCONE:</Text>
-            <View style={styles.row}>
+            <Text style={globalStyles.labelForm}>ÍCONE:</Text>
+            <View style={globalStyles.rowFlex}>
               {ICONS.map(icon => (
                 <TouchableOpacity 
                   key={icon} 
-                  style={[styles.iconBox, { backgroundColor: selectedIcon === icon ? Theme.colors.primary : Theme.colors.surface }]} 
+                  style={[globalStyles.iconBox, { backgroundColor: selectedIcon === icon ? Theme.colors.primary : Theme.colors.surface }]} 
                   onPress={() => setSelectedIcon(icon)}
                 >
                   <MaterialCommunityIcons name={icon} size={24} color={selectedIcon === icon ? 'black' : 'white'} />
@@ -188,7 +177,6 @@ export default function Profile() {
           <>
             <Text style={[globalStyles.title, { marginBottom: 5 }]}>{user?.name}</Text>
             <Text style={{ color: Theme.colors.textSecondary, marginBottom: 5 }}>{user?.email}</Text>
-            {/* Exibe o cargo do usuário para facilitar identificação do Admin */}
             <Text style={{ color: Theme.colors.primary, fontSize: 10, fontWeight: 'bold', marginBottom: 20 }}>
               {user?.role?.toUpperCase()}
             </Text>
@@ -197,10 +185,9 @@ export default function Profile() {
               <Text style={globalStyles.buttonText}>CUSTOMIZAR PERFIL</Text>
             </TouchableOpacity>
 
-            {/* HU4: Botão de gestão exclusivo para usuários com cargo de admin */}
             {user?.role === 'admin' && (
               <TouchableOpacity 
-                style={[styles.logoutBtn, { borderColor: Theme.colors.primary, marginTop: 10 }]} 
+                style={[globalStyles.outlineBtn, { borderColor: Theme.colors.primary, marginTop: 10 }]} 
                 onPress={() => router.push({
                   pathname: '/admin-users',
                   params: { userRole: user.role }
@@ -210,7 +197,7 @@ export default function Profile() {
               </TouchableOpacity>
             )}
 
-            <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+            <TouchableOpacity style={[globalStyles.outlineBtn, { borderColor: Theme.colors.danger }]} onPress={handleLogout}>
               <Text style={{ color: Theme.colors.danger, fontWeight: 'bold' }}>SAIR DA CONTA</Text>
             </TouchableOpacity>
           </>
@@ -219,15 +206,3 @@ export default function Profile() {
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  header: { alignItems: 'center' },
-  avatarCircle: { width: 120, height: 120, borderRadius: 60, justifyContent: 'center', alignItems: 'center', marginBottom: 25, elevation: 15, shadowOpacity: 0.8, shadowRadius: 20, overflow: 'hidden' },
-  avatarImage: { width: '100%', height: '100%' },
-  cameraBadge: { position: 'absolute', bottom: 0, backgroundColor: 'rgba(0,0,0,0.5)', width: '100%', alignItems: 'center', padding: 2 },
-  label: { color: Theme.colors.primary, fontSize: 12, fontWeight: '900', marginBottom: 10, marginTop: 10, letterSpacing: 1 },
-  row: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20 },
-  colorDot: { width: 35, height: 35, borderRadius: 18 },
-  iconBox: { width: 45, height: 45, borderRadius: 10, justifyContent: 'center', alignItems: 'center' },
-  logoutBtn: { marginTop: 20, padding: 15, width: '100%', alignItems: 'center', borderWidth: 1, borderColor: Theme.colors.danger, borderRadius: 12 }
-});
