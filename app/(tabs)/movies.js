@@ -1,6 +1,7 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useFocusEffect } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Theme } from '../../constants/theme';
 import { getMoviesByAvailability, getMoviesByGenreOnline, getPopularMovies, getTrendingMovies, searchMoviesOnline } from '../../src/services/api';
@@ -71,54 +72,62 @@ export default function Movies() {
     }
   }
 
-  // Carrega os assistidos assim que a tela abrir
-  useEffect(() => {
-    carregarFilmesAssistidos();
-  }, []);
+  // SOLUÇÃO DA HU8: Executa sempre que o usuário entra ou volta para esta aba
+  useFocusEffect(
+    useCallback(() => {
+      carregarFilmesAssistidos();
+    }, [])
+  );
 
-  useEffect(() => {
-    async function carregarFilmesFiltrados() {
-      if (exibindoHomePrincipal) return; 
-      setLoading(true);
-      try {
-        let dados = [];
-        if (searchQuery.trim() !== "") {
-          dados = await searchMoviesOnline(searchQuery, page);
-        } else if (selectedGenre !== null) {
-          dados = await getMoviesByGenreOnline(selectedGenre, page);
+  // Carrega os filmes filtrados por pesquisa ou gênero de forma assíncrona
+  useFocusEffect(
+    useCallback(() => {
+      async function carregarFilmesFiltrados() {
+        if (exibindoHomePrincipal) return; 
+        setLoading(true);
+        try {
+          let dados = [];
+          if (searchQuery.trim() !== "") {
+            dados = await searchMoviesOnline(searchQuery, page);
+          } else if (selectedGenre !== null) {
+            dados = await getMoviesByGenreOnline(selectedGenre, page);
+          }
+          setMovies(dados);
+          if (scrollViewRef.current) scrollViewRef.current.scrollTo({ y: 0, animated: true });
+        } catch (e) {
+          console.log(e);
+        } finally {
+          setLoading(false);
         }
-        setMovies(dados);
-        if (scrollViewRef.current) scrollViewRef.current.scrollTo({ y: 0, animated: true });
-      } catch (e) {
-        console.log(e);
-      } finally {
-        setLoading(false);
       }
-    }
-    carregarFilmesFiltrados();
-  }, [page, searchQuery, selectedGenre]);
+      carregarFilmesFiltrados();
+    }, [page, searchQuery, selectedGenre, exibindoHomePrincipal])
+  );
 
-  useEffect(() => {
-    async function carregarDadosHome() {
-      if (!exibindoHomePrincipal) return;
-      setLoading(true);
-      try {
-        const [dadosTrending, dadosAvail, dadosPopulares] = await Promise.all([
-          getTrendingMovies(trendingTab),
-          getMoviesByAvailability(availTab),
-          getPopularMovies(1) 
-        ]);
-        setTrendingMovies(dadosTrending);
-        setAvailMovies(dadosAvail);
-        setMovies(dadosPopulares);
-      } catch (e) {
-        console.log(e);
-      } finally {
-        setLoading(false);
+  // Carrega os dados padrões da Home (Tendências, Categorias, etc)
+  useFocusEffect(
+    useCallback(() => {
+      async function carregarDadosHome() {
+        if (!exibindoHomePrincipal) return;
+        setLoading(true);
+        try {
+          const [dadosTrending, dadosAvail, dadosPopulares] = await Promise.all([
+            getTrendingMovies(trendingTab),
+            getMoviesByAvailability(availTab),
+            getPopularMovies(1) 
+          ]);
+          setTrendingMovies(dadosTrending);
+          setAvailMovies(dadosAvail);
+          setMovies(dadosPopulares);
+        } catch (e) {
+          console.log(e);
+        } finally {
+          setLoading(false);
+        }
       }
-    }
-    carregarDadosHome();
-  }, [exibindoHomePrincipal, trendingTab, availTab]);
+      carregarDadosHome();
+    }, [exibindoHomePrincipal, trendingTab, availTab])
+  );
 
   const avancarPagina = () => setPage((prev) => prev + 1);
   const voltarPagina = () => setPage((prev) => (prev > 1 ? prev - 1 : 1));
