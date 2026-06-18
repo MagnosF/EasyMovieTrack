@@ -176,7 +176,7 @@ export const globalStyles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   actionButtonActive: {
-    backgroundColor: 'rgba(0, 229, 255, 0.1)', // Destaque sutil azul/ciano
+    backgroundColor: 'rgba(0, 229, 255, 0.1)', 
   },
   floatingMiniCheck: {
     position: 'absolute',
@@ -334,7 +334,7 @@ export const globalStyles = StyleSheet.create({
     textAlign: 'center' 
   },
 
-  // 👤 PERFIL & AVATARES (Novas chaves adicionadas para unificação)
+  // 👤 PERFIL & AVATARES
   headerCenter: { 
     alignItems: 'center' 
   },
@@ -397,7 +397,7 @@ export const globalStyles = StyleSheet.create({
     alignItems: 'center' 
   },
   
-  // 🚪 BOTÕES DE BORDA / AÇÕES SECUNDÁRIAS (Sair, Banir, Parcerias)
+  // 🚪 BOTÕES DE BORDA / AÇÕES SECUNDÁRIAS
   outlineBtn: { 
     marginTop: 20, 
     padding: 15, 
@@ -426,5 +426,372 @@ export const globalStyles = StyleSheet.create({
     justifyContent: 'center', 
     alignItems: 'center', 
     marginRight: 12 
+  },
+
+  // 💬 MURAL DE DISCUSSÃO & COMENTÁRIOS
+  detailsHeader: {
+    width: '100%',
+    height: 230,
+    position: 'relative',
+  },
+  detailsPosterBlur: {
+    width: '100%',
+    height: '100%',
+    opacity: 0.3,
+  },
+  detailsBackButton: {
+    position: 'absolute',
+    top: 50,
+    left: 20,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    padding: 10,
+    borderRadius: 50,
+  },
+  detailsContent: {
+    padding: 20,
+    marginTop: -50,
+  },
+  movieHeaderBlock: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    marginBottom: 20,
+  },
+  movieHeaderPoster: {
+    width: 100,
+    height: 145,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#2D333B',
+  },
+  movieHeaderInfo: {
+    flex: 1,
+    marginLeft: 15,
+    paddingBottom: 5,
+  },
+  movieHeaderTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 4,
+  },
+  movieHeaderTitle: {
+    fontSize: 20,
+    flex: 1,
+  },
+  watchButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    gap: 4,
+    borderWidth: 1,
+  },
+  watchButtonText: {
+    color: '#FFF',
+    fontSize: 10,
+    fontWeight: 'bold',
+  },
+  movieDetailMetaText: {
+    color: Theme.colors.textSecondary,
+    fontSize: 13,
+    marginTop: 4,
+  },
+  genresWrapper: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    marginBottom: 15,
+    gap: 6,
+  },
+  genreBadge: {
+    backgroundColor: '#21262D',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#30363D',
+  },
+  genreBadgeText: {
+    color: Theme.colors.text,
+    fontSize: 12,
+  },
+  apiDetailsBox: {
+    backgroundColor: '#161B22',
+    padding: 15,
+    borderRadius: 8,
+    marginBottom: 25,
+    borderWidth: 1,
+    borderColor: '#2D333B',
+    gap: 6,
+  },
+  apiDetailsText: {
+    color: Theme.colors.text,
+    fontSize: 14,
+  },
+  apiDetailsLabel: {
+    fontWeight: 'bold',
+    color: Theme.colors.primary,
+  },
+  castWrapper: {
+    marginBottom: 25,
+  },
+  castScrollContainer: {
+    alignItems: 'flex-start',
+    gap: 12,
+  },
+  castActorCard: {
+    width: 85,
+    alignItems: 'center',
+  },
+  castActorImage: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    marginBottom: 6,
+    backgroundColor: '#30363D',
+  },
+  castActorPlaceholder: {
+    width: 70,
+    height: 70,
+    borderRadius: 35,
+    marginBottom: 6,
+    backgroundColor: '#21262D',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#30363D',
+  },
+  castActorName: {
+    color: Theme.colors.text,
+    fontSize: 11,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  dividerLine: {
+    height: 1,
+    backgroundColor: '#1E252E',
+    marginBottom: 20,
+  },
+  formTitle: {
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  starContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 15,
+  },
+  starSpacing: {
+    marginHorizontal: 4,
+  },
+  formInputMultiline: {
+    height: 110,
+    textAlignVertical: 'top',
+    fontSize: 13,
+    fontFamily: 'monospace',
+    paddingTop: 8,
+    paddingBottom: 8,
+    paddingHorizontal: 12,
+  },
+  formActionsWrapper: {
+    gap: 8,
+    marginTop: 12,
+  },
+  submitButton: {
+    width: '100%',
+    height: 42,
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: 6,
+  },
+  submitButtonText: {
+    fontWeight: 'bold',
+    fontSize: 15,
+  },
+  cancelButton: {
+    width: '100%',
+    height: 30,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  cancelButtonText: {
+    color: '#FF6B6B',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  muralTitle: {
+    fontSize: 18,
+    marginBottom: 15,
+  },
+  muralEmptyText: {
+    color: Theme.colors.textSecondary,
+    textAlign: 'center',
+    fontStyle: 'italic',
+    marginTop: 10,
+  },
+  commentCard: {
+    backgroundColor: '#161B22',
+    borderRadius: 8,
+    padding: 14,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: '#2D333B',
+    width: '100%',
+  },
+  commentHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 10,
+    gap: 4,
+  },
+  commentAuthorBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    flex: 1,
+    overflow: 'hidden',
+  },
+  commentAuthorAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#30363D',
+  },
+  commentAuthorPlaceholder: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#21262D',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#30363D',
+  },
+  commentAuthorNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    overflow: 'hidden',
+  },
+  commentAuthorName: {
+    color: Theme.colors.primary,
+    fontWeight: 'bold',
+    fontSize: 14,
+    flexShrink: 1,
+  },
+  commentOwnerBadge: {
+    color: Theme.colors.textSecondary,
+    fontSize: 11,
+    marginLeft: 6,
+    backgroundColor: '#21262D',
+    paddingHorizontal: 5,
+    paddingVertical: 2,
+    borderRadius: 4,
+    shrink: 0,
+  },
+  commentControlsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    shrink: 0,
+    gap: 8,
+  },
+  commentStarsRow: {
+    flexDirection: 'row',
+    gap: 1,
+    marginRight: 2,
+  },
+  commentActionsBox: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  actionIconTouch: {
+    padding: 4,
+  },
+  commentBaseText: {
+    color: Theme.colors.text,
+    fontSize: 14,
+    lineHeight: 20,
+    marginLeft: 42,
+    marginRight: 5,
+    flexWrap: 'wrap',
+  },
+  subRepliesTreeContainer: {
+    marginLeft: 42,
+    marginTop: 12,
+    paddingLeft: 12,
+    borderLeftWidth: 2,
+    borderLeftColor: '#1F6FEB',
+    gap: 10,
+  },
+  replyCard: {
+    backgroundColor: '#21262D',
+    padding: 10,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#30363D',
+    flexDirection: 'row',
+    gap: 10,
+    alignItems: 'flex-start',
+    width: '100%',
+  },
+  replyAvatar: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#30363D',
+    marginTop: 2,
+  },
+  replyAvatarPlaceholder: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: '#161B22',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#30363D',
+    marginTop: 2,
+  },
+  replyContentBox: {
+    flex: 1,
+    overflow: 'hidden',
+  },
+  replyHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 4,
+    width: '100%',
+    gap: 8,
+  },
+  replyAuthorName: {
+    color: Theme.colors.primary,
+    fontSize: 12,
+    fontWeight: 'bold',
+    flex: 1,
+  },
+  replyMetaControls: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  replyDateText: {
+    color: Theme.colors.textSecondary,
+    fontSize: 10,
+    shrink: 0,
+  },
+  replyActionTouch: {
+    padding: 2,
+  },
+  replyBodyText: {
+    color: Theme.colors.text,
+    fontSize: 13,
+    lineHeight: 18,
+    flexWrap: 'wrap',
   },
 });

@@ -1,57 +1,58 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import * as Crypto from 'expo-crypto'; // criptografia da senha para segurança
+import * as Crypto from 'expo-crypto';
 import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
 import { Alert, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Theme } from '../../constants/theme';
+import { AuthSession } from '../../src/services/authSession';
 import { globalStyles } from '../../src/styles/globalStyles';
 
-// Opções de cores e ícones para personalização do avatar
 const COLORS = ['#00E5FF', '#7B61FF', '#FFFFFF', '#4CC9FE', '#3F72AF', '#2D333B'];
 const ICONS = ['weather-lightning', 'flash', 'weather-pouring', 'movie-roll', 'popcorn', 'star'];
 
-// Tela de perfil do usuário, onde ele pode ver e editar suas informações, além de personalizar seu avatar
 export default function Profile() {
-  // Hooks para navegação, acesso ao banco de dados e parâmetros de rota
   const router = useRouter();
   const db = useSQLiteContext();
   const params = useLocalSearchParams();
 
-  // Estado para armazenar os dados do usuário e controlar o modo de edição
   const [user, setUser] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [newName, setNewName] = useState('');
   const [newPassword, setNewPassword] = useState('');
 
-  // Estado para personalização do avatar
   const [selectedColor, setSelectedColor] = useState(Theme.colors.primary);
   const [selectedIcon, setSelectedIcon] = useState('weather-lightning');
-  const [userImage, setUserImage] = useState(null); // Estado para foto da galeria
+  const [userImage, setUserImage] = useState(null);
 
-  // Função para carregar os dados do usuário a partir do banco de dados usando o e-mail passado como parâmetro
   async function loadUserData() {
     try {
-      if (params.userEmail) {
+      // 💡 CORRIGIDO: Agora usa AuthSession.userEmail em vez de AuthSession.email
+      const emailAlvo = params.userEmail?.trim() || AuthSession.userEmail?.trim();
+
+      if (emailAlvo) {
         const result = await db.getFirstAsync(
           'SELECT name, email, role, avatar_color, avatar_icon, image FROM users WHERE email = ?',
-          [params.userEmail.trim()]
+          [emailAlvo]
         );
         if (result) {
           setUser(result);
           setNewName(result.name);
           setSelectedColor(result.avatar_color || Theme.colors.primary);
           setSelectedIcon(result.avatar_icon || 'weather-lightning');
-          setUserImage(result.image); // Carrega a imagem do banco
+          setUserImage(result.image);
         }
       }
-    } catch (error) { console.error(error); }
+    } catch (error) { 
+      console.error("Erro ao carregar dados do usuário:", error); 
+    }
   }
 
-  useEffect(() => { loadUserData(); }, [params.userEmail]);
+  useEffect(() => { 
+    loadUserData(); 
+  }, [params.userEmail]);
 
-  // Função para abrir a galeria e selecionar uma foto
   async function pickImage() {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== 'granted') {
@@ -70,15 +71,22 @@ export default function Profile() {
     }
   }
 
-  // Função para lidar com o logout do usuário, exibindo uma confirmação antes de redirecionar para a tela de login
   function handleLogout() {
     Alert.alert("Sair", "Deseja encerrar sessão?", [
       { text: "Cancelar", style: "cancel" },
-      { text: "Sair", onPress: () => router.replace('/') }
+      { 
+        text: "Sair", 
+        onPress: () => {
+          // Limpa os dados da sessão ao sair
+          AuthSession.userId = null;
+          AuthSession.userEmail = null;
+          AuthSession.role = null;
+          router.replace('/');
+        } 
+      }
     ]);
   }
 
-  // Função para lidar com a atualização do perfil do usuário
   async function handleUpdateProfile() {
     if (!newName.trim()) return Alert.alert("Erro", "O nome não pode ficar vazio.");
 
@@ -89,13 +97,13 @@ export default function Profile() {
       if (newPassword.trim().length > 0) {
         if (newPassword.length < 6) return Alert.alert("Erro", "Senha muito fraca! Mínimo 6 caracteres.");
         
-        const hashedNewPassword = await Crypto.digestStringAsync(
+        const hashedPassword = await Crypto.digestStringAsync(
           Crypto.CryptoDigestAlgorithm.SHA256,
           newPassword.trim()
         );
 
         query += `, password = ?`;
-        values.push(hashedNewPassword);
+        values.push(hashedPassword);
       }
       
       query += ` WHERE email = ?`;
@@ -106,15 +114,17 @@ export default function Profile() {
       if (user) setUser({ ...user, name: newName.trim(), avatar_color: selectedColor, avatar_icon: selectedIcon, image: userImage });
       setIsEditing(false);
       setNewPassword(''); 
-      Alert.alert("Sucesso", "Perfil updated com sucesso!");
-    } catch (error) { Alert.alert("Erro", "A conexão caiu..."); }
+      Alert.alert("Sucesso", "Perfil atualizado com sucesso!");
+    } catch (error) { 
+      console.error(error);
+      Alert.alert("Erro", "Erro ao salvar os dados no banco local."); 
+    }
   }
 
   return (
     <ScrollView style={{backgroundColor: Theme.colors.background}} contentContainerStyle={{ padding: 20, paddingTop: 60 }}>
       <View style={globalStyles.headerCenter}>
         
-        {/* Avatar com Brilho Exterior (Glow) usando globalStyles */}
         <TouchableOpacity onPress={isEditing ? pickImage : null} activeOpacity={0.8}>
           <View style={[globalStyles.avatarCircle, { backgroundColor: selectedColor, shadowColor: selectedColor }]}>
             {userImage ? (
@@ -131,7 +141,7 @@ export default function Profile() {
         </TouchableOpacity>
 
         {user?.role && (
-          <Text style={{ color: Theme.colors.primary, fontSize: 10, fontWeight: 'bold', marginBottom: 20 }}>
+          <Text style={{ color: Theme.colors.primary, fontSize: 11, fontWeight: 'bold', marginBottom: 20, letterSpacing: 1 }}>
             {user.role.toUpperCase()}
           </Text>
         )}
@@ -175,29 +185,24 @@ export default function Profile() {
           </View>
         ) : (
           <>
-            <Text style={[globalStyles.title, { marginBottom: 5 }]}>{user?.name}</Text>
-            <Text style={{ color: Theme.colors.textSecondary, marginBottom: 5 }}>{user?.email}</Text>
-            <Text style={{ color: Theme.colors.primary, fontSize: 10, fontWeight: 'bold', marginBottom: 20 }}>
-              {user?.role?.toUpperCase()}
-            </Text>
+            <Text style={[globalStyles.title, { marginBottom: 5 }]}>{user?.name || "Carregando..."}</Text>
+            <Text style={{ color: Theme.colors.textSecondary, marginBottom: 20 }}>{user?.email}</Text>
             
             <TouchableOpacity style={globalStyles.buttonPrimary} onPress={() => setIsEditing(true)}>
               <Text style={globalStyles.buttonText}>CUSTOMIZAR PERFIL</Text>
             </TouchableOpacity>
 
+            {/* Proteção segura para exibição do Painel do Admin */}
             {user?.role === 'admin' && (
               <TouchableOpacity 
                 style={[globalStyles.outlineBtn, { borderColor: Theme.colors.primary, marginTop: 10 }]} 
-                onPress={() => router.push({
-                  pathname: '/admin-users',
-                  params: { userRole: user.role }
-                })}
+                onPress={() => router.push('/admin-users')}
               >
                 <Text style={{ color: Theme.colors.primary, fontWeight: 'bold' }}>GERENCIAR USUÁRIOS</Text>
               </TouchableOpacity>
             )}
 
-            <TouchableOpacity style={[globalStyles.outlineBtn, { borderColor: Theme.colors.danger }]} onPress={handleLogout}>
+            <TouchableOpacity style={[globalStyles.outlineBtn, { borderColor: Theme.colors.danger, marginTop: 10 }]} onPress={handleLogout}>
               <Text style={{ color: Theme.colors.danger, fontWeight: 'bold' }}>SAIR DA CONTA</Text>
             </TouchableOpacity>
           </>

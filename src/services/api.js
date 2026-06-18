@@ -207,8 +207,24 @@ const ajustarDadosFilmes = async (movies) => {
   return await Promise.all(promessasDeAjuste);
 };
 
-// Mantido para não quebrar outras partes do seu projeto caso usem
+// FUNÇÕES DE BANCO DE DADOS (Simuladas por enquanto, para serem implementadas no futuro)
 export const salvarFilmesNoBanco = async (db, movies) => true;
 export const searchMoviesLocal = async () => [];
+
+// Função: Busca os detalhes de um único filme pelo ID usando as regras de tradução existentes
+export const getMovieDetailsOnline = async (movieId) => {
+  try {
+    const response = await api.get(`/movie/${movieId}`, {
+      params: { language: 'pt-BR' }
+    });
+    
+    // Passei em formato de array para reaproveitar a função 'ajustarDadosFilmes' sem duplicar lógica
+    const [filmeAjustado] = await ajustarDadosFilmes([response.data]);
+    return filmeAjustado;
+  } catch (error) {
+    console.error(`Erro ao buscar detalhes do filme ${movieId}:`, error.message);
+    return null;
+  }
+};
 
 export default api;

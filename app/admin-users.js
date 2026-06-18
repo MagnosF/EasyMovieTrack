@@ -1,29 +1,31 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
 import { Alert, FlatList, Image, Text, TouchableOpacity, View } from 'react-native';
 import { Theme } from '../constants/theme';
+import { AuthSession } from '../src/services/authSession';
 import { globalStyles } from '../src/styles/globalStyles';
 
 export default function AdminUsers() {
   const db = useSQLiteContext();
   const router = useRouter();
-  const params = useLocalSearchParams(); 
   const [users, setUsers] = useState([]);
 
   useEffect(() => {
-    if (params.userRole !== 'admin') {
+    const isAdmin = AuthSession.userEmail?.toLowerCase().includes('admin') || AuthSession.role === 'admin';
+    
+    if (!isAdmin) {
       Alert.alert("Acesso Negado", "Você não tem permissão para acessar esta área.");
       router.replace('/'); 
     } else {
       loadUsers();
     }
-  }, [params.userRole]);
+  }, []);
 
   async function loadUsers() {
     try {
-      const result = await db.getAllAsync('SELECT * FROM users WHERE role != "admin"');
+      const result = await db.getAllAsync('SELECT * FROM users WHERE role != "admin" AND email NOT LIKE "%admin%"');
       setUsers(result);
     } catch (error) {
       console.error("Erro ao carregar usuários:", error);
@@ -79,7 +81,7 @@ export default function AdminUsers() {
                   <MaterialCommunityIcons name={item.avatar_icon || 'account'} size={20} color="white" />
                 )}
               </View>
-              <View>
+              <View style={{ marginLeft: 10 }}>
                 <Text style={{ color: 'white', fontWeight: 'bold', fontSize: 16 }}>{item.name}</Text>
                 <Text style={{ color: '#888', fontSize: 12 }}>{item.email}</Text>
               </View>

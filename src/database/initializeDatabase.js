@@ -25,8 +25,7 @@ export async function initializeDatabase(database) {
       );
     `);
 
-    //7️⃣ CRIAR TABELA DE FILMES ASSISTIDOS / AVALIAÇÕES (HU 7, HU 8, HU 9, HU 10)
-    // Vincula o ID do usuário ao ID do filme, além de guardar notas e comentários
+    // 7️⃣ CRIAR TABELA DE FILMES ASSISTIDOS
     await database.execAsync(`
       CREATE TABLE IF NOT EXISTS user_movies (
         user_id INTEGER NOT NULL,
@@ -36,6 +35,18 @@ export async function initializeDatabase(database) {
         review TEXT,                -- Guarda o comentário/crítica escrito
         watched_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (user_id, movie_id),
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+      );
+    `);
+
+    // 💬 CRIAR TABELA DE COMENTÁRIOS E THREADS (Centralizada para o Mural de Discussão)
+    await database.execAsync(`
+      CREATE TABLE IF NOT EXISTS movie_reviews (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        movie_id INTEGER,
+        rating INTEGER,
+        review TEXT,
         FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
       );
     `);
@@ -75,7 +86,7 @@ export async function initializeDatabase(database) {
       `);
 
       await database.execAsync('PRAGMA user_version = 1;');
-      console.log("Banco de dados atualizado com sucesso para a versão 1!");
+      console.log("Banco de dados updated com sucesso para a versão 1!");
     }
 
   } catch (error) {

@@ -1,4 +1,4 @@
-import * as Crypto from 'expo-crypto'; // criptografia da senha para segurança
+import * as Crypto from 'expo-crypto';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
@@ -13,20 +13,20 @@ export default function ForgotPassword() {
   const router = useRouter();
 
   async function handleResetPassword() {
-    if (!email || !newPassword) {
+    const emailLimpo = email.trim().toLowerCase();
+    const senhaLimpa = newPassword.trim();
+
+    if (!emailLimpo || !senhaLimpa) {
       Alert.alert("Erro", "Preencha todos os campos!");
       return;
     }
 
-    // NOVA VALIDAÇÃO DE SEGURANÇA (HU1 e HU3)
-    if (newPassword.length < 6) {
+    if (senhaLimpa.length < 6) {
       Alert.alert("Erro", "A nova senha deve ter pelo menos 6 caracteres.");
       return;
     }
 
     try {
-      const emailLimpo = email.trim().toLowerCase();
-
       const user = await db.getFirstAsync('SELECT id FROM users WHERE email = ?', [emailLimpo]);
 
       if (!user) {
@@ -34,18 +34,18 @@ export default function ForgotPassword() {
         return;
       }
 
-      // CRIPTOGRAFIA DA NOVA SENHA (Exigência do feedback): Transforma a nova senha em Hash SHA-256 antes de salvar
+      // Criptografia segura SHA-256 antes da persistência
       const hashedNewPassword = await Crypto.digestStringAsync(
         Crypto.CryptoDigestAlgorithm.SHA256,
-        newPassword.trim()
+        senhaLimpa
       );
 
-      // Atualiza o banco de dados salvando o HASH criptografado
       await db.runAsync('UPDATE users SET password = ? WHERE email = ?', [hashedNewPassword, emailLimpo]);
 
       Alert.alert("Sucesso", "Senha redefinida com sucesso!");
       router.replace('/'); 
     } catch (error) {
+      console.error(error);
       Alert.alert("Erro", "Ocorreu um erro ao redefinir a senha.");
     }
   }
@@ -58,8 +58,9 @@ export default function ForgotPassword() {
         style={globalStyles.input} 
         placeholder="E-mail cadastrado" 
         placeholderTextColor={Theme.colors.textSecondary} 
-        onChangeText={(text) => setEmail(text)}
+        onChangeText={setEmail}
         autoCapitalize="none" 
+        keyboardType="email-address"
         value={email}
       />
       
@@ -68,7 +69,7 @@ export default function ForgotPassword() {
         placeholder="Nova Senha" 
         placeholderTextColor={Theme.colors.textSecondary} 
         secureTextEntry 
-        onChangeText={(text) => setNewPassword(text)}
+        onChangeText={setNewPassword}
         value={newPassword}
       />
       

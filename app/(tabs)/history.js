@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, Text, TouchableOpacity, View } from 'react-native';
@@ -10,15 +10,14 @@ import { globalStyles } from '../../src/styles/globalStyles';
 
 export default function History() {
   const db = useSQLiteContext();
+  const router = useRouter();
   const [watchedMovies, setWatchedMovies] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Carrega os filmes assistidos cruzando dados com a tabela de cache 'movies'
   async function carregarHistorico() {
     try {
       setLoading(true);
       
-      // Faz o INNER JOIN correto agora que o banco foi resetado do zero
       const resultado = await db.getAllAsync(
         `SELECT 
           um.movie_id, 
@@ -41,17 +40,15 @@ export default function History() {
     }
   }
 
-  // Recarrega o histórico de forma automática e instantânea sempre que o usuário entra na aba
   useFocusEffect(
     useCallback(() => {
       carregarHistorico();
     }, [])
   );
 
-  // Função para remover o item instantaneamente da lista e do SQLite, mantendo a consistência com o critério de aceitação
   async function handleRemoverAssistido(movie) {
     try {
-      // Monta o objeto no formato esperado pela função toggleWatchedMovie
+      // montar o objeto de filme para passar para a função de toggle, garantindo que os dados necessários estejam presentes
       const movieData = {
         id: movie.movie_id,
         title: movie.title,
@@ -60,10 +57,7 @@ export default function History() {
         overview: movie.overview
       };
 
-      // Executa a remoção no SQLite através do seu service original
       await toggleWatchedMovie(db, AuthSession.userId, movieData);
-
-      // Estado: remove da tela instantaneamente para cumprir o critério de aceitação
       setWatchedMovies(prev => prev.filter(item => item.movie_id !== movie.movie_id));
     } catch (error) {
       console.error("Erro ao remover filme do histórico:", error);
@@ -72,7 +66,6 @@ export default function History() {
 
   return (
     <View style={globalStyles.safeArea}>
-      {/* Cabeçalho padrão unificado */}
       <View style={globalStyles.headerRowLeft}>
         <MaterialCommunityIcons name="eye-check" size={34} color={Theme.colors.primary} style={{ marginRight: 10 }} />
         <Text style={[globalStyles.title, { marginBottom: 0 }]}>MEU HISTÓRICO</Text>
@@ -92,7 +85,11 @@ export default function History() {
           keyExtractor={(item) => item.movie_id.toString()}
           contentContainerStyle={{ paddingBottom: 20 }}
           renderItem={({ item }) => (
-            <View style={globalStyles.movieCard}>
+            <TouchableOpacity 
+              style={globalStyles.movieCard}
+              onPress={() => router.push(`/movie/${item.movie_id}`)}
+              activeOpacity={0.7}
+            >
               {item.poster_path ? (
                 <Image source={{ uri: `https://image.tmdb.org/t/p/w200${item.poster_path}` }} style={globalStyles.posterImage} />
               ) : (
@@ -107,10 +104,12 @@ export default function History() {
                     {item.title}
                   </Text>
                   
-                  {/* Botão de lixeira/remover ativo (Olho fechado) */}
                   <TouchableOpacity 
                     style={[globalStyles.actionButton, { backgroundColor: 'rgba(255, 69, 58, 0.1)' }]} 
-                    onPress={() => handleRemoverAssistido(item)}
+                    onPress={(e) => {
+                      e.stopPropagation();
+                      handleRemoverAssistido(item);
+                    }}
                   >
                     <MaterialCommunityIcons 
                       name="eye-off" 
@@ -127,7 +126,7 @@ export default function History() {
                   {item.overview || "Sinopse não disponível."}
                 </Text>
               </View>
-            </View>
+            </TouchableOpacity>
           )}
           ListEmptyComponent={
             <View style={[globalStyles.loadingContainer, { marginTop: 40 }]}>

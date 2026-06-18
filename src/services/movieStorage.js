@@ -14,34 +14,35 @@ async function saveMovieCache(database, movie) {
 }
 
 /**
- * 7️⃣ Adiciona ou remove um filme da lista de assistidos do usuário (Toggle)
- * Retorna true se o filme passou a ser assistido, ou false se foi removido.
+ * 7️⃣ Adiciona ou alterna o status de um filme na lista de assistidos do usuário (Toggle seguro)
+ * Retorna true se o filme passou a ser assistido, ou false se foi desmarcado.
  */
 export async function toggleWatchedMovie(database, userId, movie) {
   try {
     // 1. Primeiro garante que os dados estáticos do filme existem no banco
     await saveMovieCache(database, movie);
 
-    // 2. Verifica se o usuário já marcou esse filme antes
+    // 2. Verifica se o usuário já possui um registro para esse filme
     const row = await database.getFirstAsync(
-      "SELECT * FROM user_movies WHERE user_id = ? AND movie_id = ?;",
+      "SELECT watched FROM user_movies WHERE user_id = ? AND movie_id = ?;",
       [userId, movie.id]
     );
 
     if (row) {
-      // Se já existia, o usuário clicou de novo para "desmarcar". Então deletamos.
+      // Se já existia, alterna o status (se era 1 vira 0, se era 0 vira 1)
+      const novoStatus = row.watched === 1 ? 0 : 1;
       await database.runAsync(
-        "DELETE FROM user_movies WHERE user_id = ? AND movie_id = ?;",
-        [userId, movie.id]
+        "UPDATE user_movies SET watched = ? WHERE user_id = ? AND movie_id = ?;",
+        [novoStatus, userId, movie.id]
       );
-      return false; // Agora não está mais assistido
+      return novoStatus === 1; // Retorna true se ativou, false se desativou
     } else {
-      // Se não existia, inserimos um novo registro de assistido
+      // Se não existia nada, insere um novo registro marcado como assistido (1)
       await database.runAsync(
         "INSERT INTO user_movies (user_id, movie_id, watched) VALUES (?, ?, 1);",
         [userId, movie.id]
       );
-      return true; // Agora está assistido!
+      return true;
     }
   } catch (error) {
     console.error("Erro ao alternar status de assistido:", error);

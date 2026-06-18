@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useFocusEffect } from 'expo-router';
+import { useFocusEffect, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -22,6 +22,8 @@ const LISTA_GENEROS = [
 
 export default function Movies() {
   const db = useSQLiteContext();
+  const router = useRouter();
+  
   const [movies, setMovies] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
@@ -34,34 +36,26 @@ export default function Movies() {
   const [availMovies, setAvailMovies] = useState([]);
   const [availTab, setAvailTab] = useState('streaming'); 
   
-  // 7️⃣ ESTADO HISTÓRICO: Guarda a lista de IDs de filmes que o usuário já marcou como assistidos
   const [watchedMovieIds, setWatchedMovieIds] = useState([]);
 
   const scrollViewRef = useRef(null);
   const exibindoHomePrincipal = searchQuery.trim() === "" && selectedGenre === null;
 
-  // 7️⃣ Função para carregar a lista de IDs assistidos do banco de dados local
   async function carregarFilmesAssistidos() {
     try {
       const resultado = await db.getAllAsync(
         "SELECT movie_id FROM user_movies WHERE user_id = ? AND watched = 1;",
         [AuthSession.userId]
       );
-      // Converte o array de objetos [{movie_id: 123}] em um array de números simples [123, 456]
-      const ids = resultado.map(item => item.movie_id);
-      setWatchedMovieIds(ids);
+      setWatchedMovieIds(resultado.map(item => item.movie_id));
     } catch (error) {
       console.error("Erro ao carregar lista de assistidos do banco:", error);
     }
   }
 
-  // 7️⃣ Função de clique no botão de Assistido
   async function handleToggleWatched(movie) {
     try {
-      // Executa a função do nosso serviço passando os parâmetros corretos
       const foiAdicionado = await toggleWatchedMovie(db, AuthSession.userId, movie);
-      
-      // Atualiza o estado da tela instantaneamente sem precisar recarregar o app
       if (foiAdicionado) {
         setWatchedMovieIds(prev => [...prev, movie.id]);
       } else {
@@ -72,73 +66,75 @@ export default function Movies() {
     }
   }
 
-  // SOLUÇÃO DA HU8: Executa sempre que o usuário entra ou volta para esta aba
   useFocusEffect(
     useCallback(() => {
       carregarFilmesAssistidos();
     }, [])
   );
 
-  // Carrega os filmes filtrados por pesquisa ou gênero de forma assíncrona
   useFocusEffect(
     useCallback(() => {
-      async function carregarFilmesFiltrados() {
-        if (exibindoHomePrincipal) return; 
-        setLoading(true);
-        try {
-          let dados = [];
-          if (searchQuery.trim() !== "") {
-            dados = await searchMoviesOnline(searchQuery, page);
-          } else if (selectedGenre !== null) {
-            dados = await getMoviesByGenreOnline(selectedGenre, page);
-          }
-          setMovies(dados);
-          if (scrollViewRef.current) scrollViewRef.current.scrollTo({ y: 0, animated: true });
-        } catch (e) {
-          console.log(e);
-        } finally {
-          setLoading(false);
-        }
-      }
-      carregarFilmesFiltrados();
-    }, [page, searchQuery, selectedGenre, exibindoHomePrincipal])
-  );
+      let isMounted = true;
 
-  // Carrega os dados padrões da Home (Tendências, Categorias, etc)
-  useFocusEffect(
-    useCallback(() => {
-      async function carregarDadosHome() {
-        if (!exibindoHomePrincipal) return;
+      async function sincronizarDadosTMDB() {
         setLoading(true);
         try {
-          const [dadosTrending, dadosAvail, dadosPopulares] = await Promise.all([
-            getTrendingMovies(trendingTab),
-            getMoviesByAvailability(availTab),
-            getPopularMovies(1) 
-          ]);
-          setTrendingMovies(dadosTrending);
-          setAvailMovies(dadosAvail);
-          setMovies(dadosPopulares);
+          if (exibindoHomePrincipal) {
+            const [dadosTrending, dadosAvail, dadosPopulares] = await Promise.all([
+              getTrendingMovies(trendingTab),
+              getMoviesByAvailability(availTab),
+              getPopularMovies(1) 
+            ]);
+            
+            if (isMounted) {
+              setTrendingMovies(dadosTrending);
+              setAvailMovies(dadosAvail);
+              setMovies(dadosPopulares);
+            }
+          } else {
+            let dados = [];
+            if (searchQuery.trim() !== "") {
+              dados = await searchMoviesOnline(searchQuery, page);
+            } else if (selectedGenre !== null) {
+              dados = await getMoviesByGenreOnline(selectedGenre, page);
+            }
+            
+            if (isMounted) {
+              setMovies(dados);
+              if (scrollViewRef.current) {
+                scrollViewRef.current.scrollTo({ y: 0, animated: true });
+              }
+            }
+          }
         } catch (e) {
-          console.log(e);
+          console.error("Erro ao carregar dados do TMDB:", e);
         } finally {
-          setLoading(false);
+          if (isMounted) setLoading(false);
         }
       }
-      carregarDadosHome();
-    }, [exibindoHomePrincipal, trendingTab, availTab])
+
+      sincronizarDadosTMDB();
+
+      return () => {
+        isMounted = false;
+      };
+    }, [page, searchQuery, selectedGenre, exibindoHomePrincipal, trendingTab, availTab])
   );
 
   const avancarPagina = () => setPage((prev) => prev + 1);
   const voltarPagina = () => setPage((prev) => (prev > 1 ? prev - 1 : 1));
 
-  // RENDERIZAÇÃO DO CARROSSEL HORIZONTAL
   const RenderCarrosselHorizontal = ({ data }) => (
     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={globalStyles.horizontalScroll}>
       {data.map((item) => {
         const jaAssistiu = watchedMovieIds.includes(item.id);
         return (
-          <View key={item.id} style={globalStyles.miniCard}>
+          <TouchableOpacity 
+            key={item.id} 
+            style={globalStyles.miniCard}
+            onPress={() => router.push(`/movie/${item.id}`)}
+            activeOpacity={0.8}
+          >
             {item.poster_path ? (
               <Image source={{ uri: `https://image.tmdb.org/t/p/w200${item.poster_path}` }} style={globalStyles.miniPoster} />
             ) : (
@@ -147,10 +143,12 @@ export default function Movies() {
               </View>
             )}
             
-            {/* 🍿 Botão flutuante de assistido para itens do carrossel horizontal */}
             <TouchableOpacity 
               style={[globalStyles.floatingMiniCheck, jaAssistiu && { backgroundColor: Theme.colors.primary }]}
-              onPress={() => handleToggleWatched(item)}
+              onPress={(e) => {
+                e.stopPropagation(); 
+                handleToggleWatched(item);
+              }}
             >
               <MaterialCommunityIcons 
                 name={jaAssistiu ? "eye" : "eye-off-outline"} 
@@ -161,7 +159,7 @@ export default function Movies() {
 
             <Text style={globalStyles.miniTitle} numberOfLines={1}>{item.title}</Text>
             <Text style={globalStyles.miniNote}>⭐ {item.vote_average ? item.vote_average.toFixed(1) : 'N/A'}</Text>
-          </View>
+          </TouchableOpacity>
         );
       })}
     </ScrollView>
@@ -256,11 +254,15 @@ export default function Movies() {
       ) : (
         <View style={{ width: '100%' }}>
           {movies.map((movie) => {
-            // 7️⃣ Verifica se este filme específico da iteração está na lista de assistidos
             const jaAssistiu = watchedMovieIds.includes(movie.id);
 
             return (
-              <View key={movie.id} style={globalStyles.movieCard}>
+              <TouchableOpacity 
+                key={movie.id} 
+                style={globalStyles.movieCard}
+                onPress={() => router.push(`/movie/${movie.id}`)}
+                activeOpacity={0.7}
+              >
                 {movie.poster_path ? (
                   <Image source={{ uri: `https://image.tmdb.org/t/p/w200${movie.poster_path}` }} style={globalStyles.posterImage} />
                 ) : (
@@ -272,10 +274,12 @@ export default function Movies() {
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'flex-start', width: '100%' }}>
                     <Text style={[globalStyles.movieTitle, { flex: 1, paddingRight: 8 }]} numberOfLines={2}>{movie.title}</Text>
                     
-                    {/* 7️⃣ ÍCONE INTERATIVO DE ASSISTIDO MIGRADO PARA GLOBAL */}
                     <TouchableOpacity 
                       style={[globalStyles.actionButton, jaAssistiu && globalStyles.actionButtonActive]} 
-                      onPress={() => handleToggleWatched(movie)}
+                      onPress={(e) => {
+                        e.stopPropagation(); 
+                        handleToggleWatched(movie);
+                      }}
                     >
                       <MaterialCommunityIcons 
                         name={jaAssistiu ? "eye" : "eye-outline"} 
@@ -288,7 +292,7 @@ export default function Movies() {
                   <Text style={globalStyles.movieYear}>Lançamento: {movie.release_date ? movie.release_date.split('-')[0] : 'N/A'}</Text>
                   <Text style={globalStyles.movieOverview} numberOfLines={3}>{movie.overview || "Sinopse não disponível."}</Text>
                 </View>
-              </View>
+              </TouchableOpacity>
             );
           })}
 

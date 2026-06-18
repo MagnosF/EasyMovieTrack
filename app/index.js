@@ -1,58 +1,53 @@
-import * as Crypto from 'expo-crypto'; // criptografia da senha para segurança
+import * as Crypto from 'expo-crypto';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useState } from 'react';
 import { Alert, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Theme } from '../constants/theme';
-import { globalStyles } from '../src/styles/globalStyles';
-//Importa o gerenciador de sessão para salvar quem logou
 import { AuthSession } from '../src/services/authSession';
+import { globalStyles } from '../src/styles/globalStyles';
 
-// Tela de login, onde o usuário pode inserir seu e-mail e senha para acessar sua conta ou navegar para as telas de recuperação de senha e registro
 export default function Login() {
-  // Estados para armazenar o e-mail e a senha inseridos pelo usuário
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const db = useSQLiteContext();
   const router = useRouter();
 
-  // Função para lidar com o login do usuário, incluindo validação dos campos e consulta ao banco de dados para verificar as credenciais
   async function handleLogin() {
-    if (!email || !password) return Alert.alert("Erro", "Preencha todos os campos.");
+    if (!email || !password) {
+      return Alert.alert("Erro", "Preencha todos os campos.");
+    }
     
-    // Consulta ao banco dados para verificar se existe um usuário com o e-mail e senha fornecidos
     try {
-      // Garante que o e-mail do login também fique todo minúsculo para bater com o banco
       const emailLimpo = email.trim().toLowerCase();
 
-      // CRIPTOGRAFIA DA SENHA (Exigência do feedback): Transforma a senha digitada em Hash SHA-256
+      // Transforma a senha digitada em Hash SHA-256
       const hashedPassword = await Crypto.digestStringAsync(
         Crypto.CryptoDigestAlgorithm.SHA256,
         password.trim()
       );
 
-      console.log("Hash gerado no login:", hashedPassword);
-
-      // Consulta ao banco de dados usando o hash gerado para verificar as credenciais do usuário
+      // Consulta de credenciais seguras
       const user = await db.getFirstAsync(
         'SELECT * FROM users WHERE email = ? AND password = ?',
         [emailLimpo, hashedPassword]
       );
       
-      // Se um usuário for encontrado, salva seus dados na sessão e redireciona
       if (user) {
-        // 🍿 7️⃣ SALVA A SESSÃO: Guarda o ID e o Email do usuário real para a tela de filmes saber quem ele é
+        // Alimenta a sessão estática global do app de forma segura
         AuthSession.userId = user.id;
         AuthSession.userEmail = user.email;
+        AuthSession.role = user.role; 
 
-        console.log(`Usuário conectado com sucesso! ID: ${user.id}, Nome: ${user.name}`);
+        console.log(`Usuário conectado: ID: ${user.id}, Cargo: ${user.role}`);
 
-        router.replace(`/(tabs)/profile?userEmail=${user.email}`); 
+        // Navega para a aba do perfil limpando o histórico de login da pilha
+        router.replace('/(tabs)/profile'); 
       } else {
         Alert.alert("Erro", "E-mail ou senha incorretos.");
       }
     } catch (error) {
-      Alert.alert("Erro", "Erro ao acessar o banco.");
+      Alert.alert("Erro", "Erro ao acessar o banco de dados.");
     }
   }
 
@@ -64,15 +59,16 @@ export default function Login() {
         style={globalStyles.input} 
         placeholder="E-mail" 
         placeholderTextColor={Theme.colors.textSecondary} 
-        onChangeText={(text) => setEmail(text)} 
+        onChangeText={setEmail} 
         autoCapitalize="none" 
+        keyboardType="email-address"
         value={email} 
       />
       <TextInput 
         style={globalStyles.input} 
         placeholder="Senha" 
         placeholderTextColor={Theme.colors.textSecondary} 
-        onChangeText={(text) => setPassword(text)} 
+        onChangeText={setPassword} 
         secureTextEntry 
         value={password} 
       />
