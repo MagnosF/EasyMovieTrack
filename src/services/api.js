@@ -207,9 +207,57 @@ const ajustarDadosFilmes = async (movies) => {
   return await Promise.all(promessasDeAjuste);
 };
 
-// FUNÇÕES DE BANCO DE DADOS (Simuladas por enquanto, para serem implementadas no futuro)
-export const salvarFilmesNoBanco = async (db, movies) => true;
-export const searchMoviesLocal = async () => [];
+// FUNÇÕES DE BANCO DE DADOS: Salva cache e faz busca local na tabela de filmes
+export const salvarFilmesNoBanco = async (db, movies) => {
+  if (!db || !Array.isArray(movies) || movies.length === 0) return 0;
+
+  const statement = `INSERT OR IGNORE INTO movies (id, title, overview, poster_path, release_date) VALUES (?, ?, ?, ?, ?);`;
+  let savedCount = 0;
+
+  for (const movie of movies) {
+    if (!movie?.id) continue;
+
+    const id = Number(movie.id);
+    if (!Number.isFinite(id)) {
+      console.warn('salvarFilmesNoBanco ignorou filme com id inválido:', movie?.id);
+      continue;
+    }
+
+    const title = movie.title != null ? String(movie.title) : null;
+    const overview = movie.overview != null ? String(movie.overview) : null;
+    const poster_path = movie.poster_path != null ? String(movie.poster_path) : null;
+    const release_date = movie.release_date != null ? String(movie.release_date) : null;
+
+    try {
+      await db.runAsync(statement, [id, title, overview, poster_path, release_date]);
+      savedCount += 1;
+    } catch (error) {
+      console.warn(`Erro ao salvar filme ${id} no banco local:`, error);
+    }
+  }
+
+  return savedCount;
+};
+
+export const searchMoviesLocal = async (db, queryText = '') => {
+  if (!db || !queryText.trim()) return [];
+
+  const termoBusca = `%${queryText.trim()}%`;
+  try {
+    const results = await db.getAllAsync(
+      `SELECT * FROM movies
+       WHERE title LIKE ? OR overview LIKE ?
+       ORDER BY release_date DESC
+       LIMIT 50;`,
+      [termoBusca, termoBusca]
+    );
+
+    return results || [];
+  } catch (error) {
+    console.error('Erro ao buscar filmes localmente:', error);
+    return [];
+  }
+};
 
 // Função: Busca os detalhes de um único filme pelo ID usando as regras de tradução existentes
 export const getMovieDetailsOnline = async (movieId) => {

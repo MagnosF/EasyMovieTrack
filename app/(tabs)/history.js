@@ -5,7 +5,7 @@ import { useCallback, useState } from 'react';
 import { ActivityIndicator, FlatList, Image, Text, TouchableOpacity, View } from 'react-native';
 import { Theme } from '../../constants/theme';
 import { AuthSession } from '../../src/services/authSession';
-import { toggleWatchedMovie } from '../../src/services/movieStorage';
+import { getUserWatchedMovies, toggleWatchedMovie } from '../../src/services/movieStorage';
 import { globalStyles } from '../../src/styles/globalStyles';
 
 export default function History() {
@@ -17,21 +17,7 @@ export default function History() {
   async function carregarHistorico() {
     try {
       setLoading(true);
-      
-      const resultado = await db.getAllAsync(
-        `SELECT 
-          um.movie_id, 
-          m.title, 
-          m.poster_path, 
-          m.release_date, 
-          m.overview 
-         FROM user_movies um
-         INNER JOIN movies m ON um.movie_id = m.id
-         WHERE um.user_id = ? AND um.watched = 1
-         ORDER BY um.watched_at DESC;`,
-        [AuthSession.userId]
-      );
-      
+      const resultado = await getUserWatchedMovies(db, AuthSession.userId);
       setWatchedMovies(resultado);
     } catch (error) {
       console.error("Erro ao carregar histórico de filmes assistidos:", error);

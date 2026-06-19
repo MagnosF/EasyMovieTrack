@@ -4,9 +4,9 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, Image, ScrollView, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Theme } from '../../constants/theme';
-import { getMoviesByAvailability, getMoviesByGenreOnline, getPopularMovies, getTrendingMovies, searchMoviesOnline } from '../../src/services/api';
+import { getMoviesByAvailability, getMoviesByGenreOnline, getPopularMovies, getTrendingMovies, salvarFilmesNoBanco, searchMoviesLocal, searchMoviesOnline } from '../../src/services/api';
 import { AuthSession } from '../../src/services/authSession';
-import { toggleWatchedMovie } from '../../src/services/movieStorage';
+import { getWatchedMovieIds, toggleWatchedMovie } from '../../src/services/movieStorage';
 import { globalStyles } from '../../src/styles/globalStyles';
 
 const LISTA_GENEROS = [
@@ -43,11 +43,8 @@ export default function Movies() {
 
   async function carregarFilmesAssistidos() {
     try {
-      const resultado = await db.getAllAsync(
-        "SELECT movie_id FROM user_movies WHERE user_id = ? AND watched = 1;",
-        [AuthSession.userId]
-      );
-      setWatchedMovieIds(resultado.map(item => item.movie_id));
+      const resultado = await getWatchedMovieIds(db, AuthSession.userId);
+      setWatchedMovieIds(resultado);
     } catch (error) {
       console.error("Erro ao carregar lista de assistidos do banco:", error);
     }
@@ -83,20 +80,36 @@ export default function Movies() {
             const [dadosTrending, dadosAvail, dadosPopulares] = await Promise.all([
               getTrendingMovies(trendingTab),
               getMoviesByAvailability(availTab),
-              getPopularMovies(1) 
+              getPopularMovies(1)
             ]);
-            
+
             if (isMounted) {
               setTrendingMovies(dadosTrending);
               setAvailMovies(dadosAvail);
               setMovies(dadosPopulares);
             }
+
+            await salvarFilmesNoBanco(db, [...dadosTrending, ...dadosAvail, ...dadosPopulares]);
           } else {
             let dados = [];
             if (searchQuery.trim() !== "") {
-              dados = await searchMoviesOnline(searchQuery, page);
+              try {
+                dados = await searchMoviesOnline(searchQuery, page);
+              } catch (searchError) {
+                console.warn('Busca online falhou, usando cache local:', searchError);
+                dados = await searchMoviesLocal(db, searchQuery);
+              }
+
+              if (dados.length === 0) {
+                dados = await searchMoviesLocal(db, searchQuery);
+              }
             } else if (selectedGenre !== null) {
-              dados = await getMoviesByGenreOnline(selectedGenre, page);
+              try {
+                dados = await getMoviesByGenreOnline(selectedGenre, page);
+              } catch (genreError) {
+                console.warn('Busca de gênero falhou, retornando lista vazia:', genreError);
+                dados = [];
+              }
             }
             
             if (isMounted) {

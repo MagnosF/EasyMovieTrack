@@ -1,5 +1,7 @@
 export async function initializeDatabase(database) {
   try {
+    await database.execAsync('PRAGMA foreign_keys = ON;');
+
     // 🎬 CRIAR TABELA DE FILMES (Geral)
     await database.execAsync(`
       CREATE TABLE IF NOT EXISTS movies (
@@ -35,7 +37,8 @@ export async function initializeDatabase(database) {
         review TEXT,                -- Guarda o comentário/crítica escrito
         watched_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         PRIMARY KEY (user_id, movie_id),
-        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+        FOREIGN KEY (movie_id) REFERENCES movies (id) ON DELETE CASCADE
       );
     `);
 
@@ -47,7 +50,8 @@ export async function initializeDatabase(database) {
         movie_id INTEGER,
         rating INTEGER,
         review TEXT,
-        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+        FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+        FOREIGN KEY (movie_id) REFERENCES movies (id) ON DELETE CASCADE
       );
     `);
 

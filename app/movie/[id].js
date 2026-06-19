@@ -6,6 +6,7 @@ import { ActivityIndicator, Alert, Image, ScrollView, Text, TextInput, Touchable
 import { Theme } from '../../constants/theme';
 import api, { getMovieDetailsOnline } from '../../src/services/api';
 import { AuthSession } from '../../src/services/authSession';
+import { isMovieWatched, toggleWatchedMovie } from '../../src/services/movieStorage';
 import { globalStyles } from '../../src/styles/globalStyles';
 
 export default function MovieDetails() {
@@ -162,11 +163,8 @@ export default function MovieDetails() {
         }
       }
 
-      const userMovieRow = await db.getFirstAsync(
-        "SELECT watched FROM user_movies WHERE user_id = ? AND movie_id = ?;",
-        [AuthSession.userId, id]
-      );
-      setWatched(!!userMovieRow?.watched);
+      const watchedStatus = await isMovieWatched(db, AuthSession.userId, id);
+      setWatched(watchedStatus);
 
       const reviewsPublicos = await db.getAllAsync(
         `SELECT mr.id, mr.user_id, mr.movie_id, mr.rating, mr.review, 
@@ -192,16 +190,18 @@ export default function MovieDetails() {
   }, [id, editingReviewId, replyTarget]);
 
   async function toggleAssistido() {
-    const novoStatusWatched = !watched ? 1 : 0;
     try {
-      const existeOpcao = await db.getFirstAsync("SELECT * FROM user_movies WHERE user_id = ? AND movie_id = ?;", [AuthSession.userId, id]);
-      if (existeOpcao) {
-        await db.runAsync("UPDATE user_movies SET watched = ? WHERE user_id = ? AND movie_id = ?;", [novoStatusWatched, AuthSession.userId, id]);
-      } else {
-        await db.runAsync("INSERT INTO user_movies (user_id, movie_id, watched, rating, review) VALUES (?, ?, ?, 0, '');", [AuthSession.userId, id, novoStatusWatched]);
-      }
-      setWatched(!watched);
-      Alert.alert("Sucesso", !watched ? "Marcado como Assistido! 👁️" : "Removido de Assistidos.");
+      const currentMovie = {
+        id: Number(id),
+        title: movie?.title || '',
+        overview: movie?.overview || '',
+        poster_path: movie?.poster_path || null,
+        release_date: movie?.release_date || null
+      };
+
+      const novoStatus = await toggleWatchedMovie(db, AuthSession.userId, currentMovie);
+      setWatched(novoStatus);
+      Alert.alert("Sucesso", novoStatus ? "Marcado como Assistido! 👁️" : "Removido de Assistidos.");
     } catch (error) {
       console.error(error);
     }
