@@ -2,7 +2,7 @@ import { StyleSheet } from 'react-native';
 import { Theme } from '../../constants/theme';
 
 export const globalStyles = StyleSheet.create({
-  // 🌐 LAYOUT GERAL & ESTILOS BASE
+  // LAYOUT GERAL & ESTILOS BASE
   safeArea: {
     flex: 1,
     backgroundColor: Theme.colors.background,
@@ -42,7 +42,7 @@ export const globalStyles = StyleSheet.create({
     textAlign: 'left' 
   },
 
-  // 🔍 INPUTS & COMPONENTES DE BUSCA
+  // INPUTS & COMPONENTES DE BUSCA
   input: {
     backgroundColor: Theme.colors.surface,
     color: Theme.colors.text,
@@ -72,7 +72,7 @@ export const globalStyles = StyleSheet.create({
     height: '100%' 
   },
 
-  // 🏷️ CHIPS DE GÊNERO / FILTROS RAPIDOS
+  // CHIPS DE GÊNERO / FILTROS RAPIDOS
   genreWrapper: { 
     width: '100%', 
     marginBottom: 20 
@@ -120,7 +120,7 @@ export const globalStyles = StyleSheet.create({
     marginTop: 15,
   },
 
-  // 🎬 CARDS VERTICAIS DE FILME (Catálogo principal e futuro Histórico)
+  // CARDS VERTICAIS DE FILME (Catálogo principal e futuro Histórico)
   movieCard: { 
     width: '100%', 
     backgroundColor: Theme.colors.surface, 
@@ -169,7 +169,7 @@ export const globalStyles = StyleSheet.create({
     lineHeight: 16 
   },
 
-  // 🍿 INTERAÇÃO DE FILMES (HU 7 - Botão Assistido / Olho)
+  // INTERAÇÃO DE FILMES (HU 7 - Botão Assistido / Olho)
   actionButton: {
     padding: 6,
     borderRadius: 8,
@@ -193,7 +193,7 @@ export const globalStyles = StyleSheet.create({
     borderColor: '#2D333B'
   },
 
-  // 🎞️ CARROSSEL HORIZONTAL (Estilo Netflix/Tendências)
+  // CARROSSEL HORIZONTAL (Estilo Netflix/Tendências)
   horizontalScroll: { 
     paddingRight: 20 
   },
@@ -227,7 +227,7 @@ export const globalStyles = StyleSheet.create({
     marginTop: 1 
   },
 
-  // 🎛️ SELETORES (TOGGLES) E SEÇÕES DA HOME
+  // SELETORES (TOGGLES) E SEÇÕES DA HOME
   sectionHeaderContainer: { 
     flexDirection: 'row', 
     width: '100%', 
@@ -288,7 +288,7 @@ export const globalStyles = StyleSheet.create({
     fontWeight: 'bold' 
   },
 
-  // 🔢 BLOCO DE PAGINAÇÃO GLOBAL
+  // BLOCO DE PAGINAÇÃO GLOBAL
   paginationContainer: { 
     flexDirection: 'row', 
     justifyContent: 'space-between', 
@@ -321,7 +321,7 @@ export const globalStyles = StyleSheet.create({
     fontSize: 15 
   },
 
-  // ⏳ LOADINGS PADRÃO
+  // LOADINGS PADRÃO
   loadingContainer: { 
     marginVertical: 40, 
     alignItems: 'center', 
@@ -334,7 +334,7 @@ export const globalStyles = StyleSheet.create({
     textAlign: 'center' 
   },
 
-  // 👤 PERFIL & AVATARES
+  // PERFIL & AVATARES
   headerCenter: { 
     alignItems: 'center' 
   },
@@ -397,7 +397,7 @@ export const globalStyles = StyleSheet.create({
     alignItems: 'center' 
   },
   
-  // 🚪 BOTÕES DE BORDA / AÇÕES SECUNDÁRIAS
+  // BOTÕES DE BORDA / AÇÕES SECUNDÁRIAS
   outlineBtn: { 
     marginTop: 20, 
     padding: 15, 
@@ -407,7 +407,7 @@ export const globalStyles = StyleSheet.create({
     borderRadius: 12 
   },
 
-  // 👥 LISTAS DE USUÁRIOS / CARDS DE ADMINISTRAÇÃO
+  // LISTAS DE USUÁRIOS / CARDS DE ADMINISTRAÇÃO
   userCardLayout: { 
     flexDirection: 'row', 
     justifyContent: 'space-between', 
@@ -428,7 +428,7 @@ export const globalStyles = StyleSheet.create({
     marginRight: 12 
   },
 
-  // 💬 MURAL DE DISCUSSÃO & COMENTÁRIOS
+  // MURAL DE DISCUSSÃO & COMENTÁRIOS
   detailsHeader: {
     width: '100%',
     height: 230,

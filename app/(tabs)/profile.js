@@ -28,7 +28,7 @@ export default function Profile() {
 
   async function loadUserData() {
     try {
-      // 💡 CORRIGIDO: Agora usa AuthSession.userEmail em vez de AuthSession.email
+      // CORRIGIDO: Agora usa AuthSession.userEmail em vez de AuthSession.email
       const emailAlvo = params.userEmail?.trim() || AuthSession.userEmail?.trim();
 
       if (emailAlvo) {

@@ -46,7 +46,7 @@ export const getPopularMovies = async (page = 1) => {
   }
 };
 
-// 🎭FUNÇÃO: Busca filmes online filtrados por Gênero
+// FUNÇÃO: Busca filmes online filtrados por Gênero
 export const getMoviesByGenreOnline = async (genreId, page = 1) => {
   if (!genreId) return [];
 
@@ -73,7 +73,7 @@ export const getMoviesByGenreOnline = async (genreId, page = 1) => {
   }
 };
 
-// 🌐 FUNÇÃO DE BUSCA PROTEGIDA CONTRA ERROS DE CONEXÃO
+// FUNÇÃO DE BUSCA PROTEGIDA CONTRA ERROS DE CONEXÃO
 export const searchMoviesOnline = async (queryText = "", page = 1) => {
   const termoBusca = queryText ? queryText.trim() : "";
   if (!termoBusca) return [];
@@ -117,7 +117,7 @@ export const searchMoviesOnline = async (queryText = "", page = 1) => {
   }
 };
 
-// 📈 FUNÇÃO: Busca filmes em tendência (Hoje ou Semana)
+// FUNÇÃO: Busca filmes em tendência (Hoje ou Semana)
 export const getTrendingMovies = async (timeWindow = 'day') => {
   try {
     const response = await api.get(`/trending/movie/${timeWindow}`, {
@@ -130,7 +130,7 @@ export const getTrendingMovies = async (timeWindow = 'day') => {
   }
 };
 
-// 🎬 FUNÇÃO: Busca filmes por distribuição (Nos Cinemas ou plataformas)
+// FUNÇÃO: Busca filmes por distribuição (Nos Cinemas ou plataformas)
 // OBS: A API do TMDB tem limitações para disponibilidades específicas, então usei os filtros mais próximos para cada categoria
 export const getMoviesByAvailability = async (type = 'cinema') => {
   try {

@@ -2,7 +2,7 @@ export async function initializeDatabase(database) {
   try {
     await database.execAsync('PRAGMA foreign_keys = ON;');
 
-    // 🎬 CRIAR TABELA DE FILMES (Geral)
+    // CRIAR TABELA DE FILMES (Geral)
     await database.execAsync(`
       CREATE TABLE IF NOT EXISTS movies (
         id INTEGER PRIMARY KEY,
@@ -13,7 +13,7 @@ export async function initializeDatabase(database) {
       );
     `);
 
-    // 👤 CRIAR TABELA DE USUÁRIOS
+    // CRIAR TABELA DE USUÁRIOS
     await database.execAsync(`
       CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -27,7 +27,7 @@ export async function initializeDatabase(database) {
       );
     `);
 
-    // 7️⃣ CRIAR TABELA DE FILMES ASSISTIDOS
+    // CRIAR TABELA DE FILMES ASSISTIDOS
     await database.execAsync(`
       CREATE TABLE IF NOT EXISTS user_movies (
         user_id INTEGER NOT NULL,
@@ -42,7 +42,7 @@ export async function initializeDatabase(database) {
       );
     `);
 
-    // 💬 CRIAR TABELA DE COMENTÁRIOS E THREADS (Centralizada para o Mural de Discussão)
+    // CRIAR TABELA DE COMENTÁRIOS E THREADS (Centralizada para o Mural de Discussão)
     await database.execAsync(`
       CREATE TABLE IF NOT EXISTS movie_reviews (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -74,9 +74,9 @@ export async function initializeDatabase(database) {
       VALUES ('Comandante', 'admin@adm.com', '8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92', 'admin', '#00E5FF', 'weather-lightning');
     `);
 
-    // =========================================================================
+    
     // 4. MIGRATION DE SEGURANÇA: Força o hash da senha do admin se necessário
-    // =========================================================================
+
     const versionResult = await database.getFirstAsync('PRAGMA user_version;');
     const currentVersion = versionResult ? versionResult.user_version : 0;
 

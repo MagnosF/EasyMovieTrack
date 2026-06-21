@@ -49,7 +49,7 @@ export async function setMovieWatched(database, userId, movie, watched = true) {
 }
 
 /**
- * 7️⃣ Adiciona ou alterna o status de um filme na lista de assistidos do usuário (Toggle seguro)
+ * Adiciona ou alterna o status de um filme na lista de assistidos do usuário (Toggle seguro)
  * Retorna true se o filme passou a ser assistido, ou false se foi desmarcado.
  */
 export async function toggleWatchedMovie(database, userId, movie) {
@@ -70,7 +70,7 @@ export async function toggleWatchedMovie(database, userId, movie) {
 }
 
 /**
- * 🔍 Verifica se um filme específico já foi marcado como assistido por aquele usuário
+ * Verifica se um filme específico já foi marcado como assistido por aquele usuário
  */
 export async function isMovieWatched(database, userId, movieId) {
   if (!database || !userId || !movieId) return false;

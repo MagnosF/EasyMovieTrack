@@ -21,7 +21,7 @@ export default function TabLayout() {
         },
       }}
     >
-      {/* 🎞 ABA PRINCIPAL DE FILMES */}
+      {/* ABA PRINCIPAL DE FILMES */}
       <Tabs.Screen
         name="movies"
         options={{
@@ -31,7 +31,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      {/* 🍿 NOVA ABA DO HISTÓRICO DE FILMES ASSISTIDOS */}
+      {/* NOVA ABA DO HISTÓRICO DE FILMES ASSISTIDOS */}
       <Tabs.Screen
         name="history"
         options={{
@@ -41,7 +41,7 @@ export default function TabLayout() {
           ),
         }}
       />
-      {/* 🧑 ABA DE PERFIL/AVATAR */}
+      {/* ABA DE PERFIL/AVATAR */}
       <Tabs.Screen
         name="profile"
         options={{
